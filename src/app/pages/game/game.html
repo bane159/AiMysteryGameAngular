@@ -1,0 +1,343 @@
+<!-- Login Required Message -->
+@if(!(isLoggedIn$ | async)) {
+  <section class="login-required">
+    <div class="login-message">
+      <div class="lock-icon">
+        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
+      <h2>Authentication Required</h2>
+      <p>You must be logged in to access game information and play.</p>
+      <div class="login-actions">
+        <a routerLink="/login" class="btn-primary">Login</a>
+        <a routerLink="/register" class="btn-secondary">Create Account</a>
+      </div>
+    </div>
+  </section>
+}
+
+<!-- Game Content (only visible when logged in) -->
+@if(isLoggedIn$ | async) {
+  <!-- No Game ID provided -->
+  @if(!gameId) {
+    <section class="no-game">
+      <div class="no-game-message">
+        <div class="game-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <h2>No Game Selected</h2>
+        <p>Select a game from the sidebar or start a new game to begin playing.</p>
+      </div>
+    </section>
+  }
+
+  <!-- Loading State -->
+  @if(loading) {
+    <section class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading game data...</p>
+    </section>
+  }
+
+  <!-- Error State -->
+  @if(error && !loading) {
+    <section class="error-state">
+      <div class="error-message">
+        <div class="error-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+        </div>
+        <h2>Error Loading Game</h2>
+        <p>{{ error }}</p>
+        <button class="btn-primary" (click)="loadGame()">Try Again</button>
+      </div>
+    </section>
+  }
+
+  <!-- Game Loaded -->
+  @if(game && !loading && !error) {
+    <!-- Game Info Header -->
+    <section class="game-header">
+      <div class="game-info">
+        <h1>Game #{{ game.id }}</h1>
+        <div class="game-meta">
+          <span class="meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+            Created: {{ formatDate(game.created_at) }}
+          </span>
+          <span class="meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+            </svg>
+            AI Model: {{ game.ai_model.name }} ({{ game.ai_model.provider }})
+          </span>
+          <span class="meta-item status" [class.finished]="game.is_finished" [class.active]="!game.is_finished">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              @if(game.is_finished) {
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              } @else {
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              }
+            </svg>
+            {{ game.is_finished ? 'Finished: ' + formatDate(game.finished_at!) : 'In Progress' }}
+          </span>
+           <span class="meta-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+            <!-- Messages Sent: {{ game.total_messages_sent }} -->
+           </span>
+           @if(game.impostor) {
+           <span class="meta-item"> 
+            {{game.impostor}}
+           </span>
+          }
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="map-section">
+      <h2>Rooms</h2>
+      <div class="map-container">
+        <div class="rooms-grid">
+          @for(room of game.rooms_with_rules; track room.id) {
+            <div 
+              class="room-card"
+              [class.selected]="selectedRoom?.id === room.id"
+              (click)="selectRoom(room)">
+              <div class="room-header">
+                <h3>{{ room.name }}</h3>
+              </div>
+              <p class="room-description">{{ room.description }}</p>
+              <div class="rules-count">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                {{ room.rules.length }} rules
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Room Details Panel -->
+        @if(selectedRoom) {
+          <div class="room-details">
+            <h3>{{ selectedRoom.name }}</h3>
+            <p class="room-description-full">{{ selectedRoom.description }}</p>
+            <div class="rules-header">Room Rules:</div>
+            <ul class="rules-list">
+              @for(rule of selectedRoom.rules; track rule.id) {
+                <li>{{ rule.rule_text }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Characters Section -->
+    <section class="characters-section">
+      <h2>Characters</h2>
+      <div class="characters-container">
+        @for(character of game.characters; track character.id; let i = $index) {
+          <div 
+            class="character-card"
+            [style.border-color]="['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'][i % 7]">
+            <div class="character-avatar" [style.background-color]="['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'][i % 7]">
+              <span class="avatar-initial">{{ character.name.charAt(0) }}</span>
+            </div>
+            <div class="character-info">
+              <h4>{{ character.name }}</h4>
+              <p class="character-personality">{{ character.personality_description | slice:0:80 }}{{ character.personality_description.length > 80 ? '...' : '' }}</p>
+              @if(character.conversation.messages.length > 0) {
+                <div class="message-count">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                  {{ character.conversation.messages.length }} messages
+                </div>
+              }
+            </div>
+            <div class="character-actions">
+              <button class="interact-btn" (click)="selectCharacter(character)" [disabled]="game.is_finished">Talk</button>
+              <button class="guess-btn" (click)="openGuessConfirm(character)" [disabled]="game.is_finished">Guess Impostor</button>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- Chat Modal -->
+    @if(selectedCharacter) {
+      <div class="chat-overlay" (click)="closeChat()">
+        <div class="chat-modal" (click)="$event.stopPropagation()">
+          <div class="chat-header">
+            <div class="chat-character-info">
+              <div class="chat-avatar" [style.background-color]="'#8b5cf6'">
+                {{ selectedCharacter.name.charAt(0) }}
+              </div>
+              <div>
+                <h3>{{ selectedCharacter.name }}</h3>
+                <p class="chat-personality">{{ selectedCharacter.personality_description }}</p>
+              </div>
+            </div>
+            <button class="close-btn" (click)="closeChat()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+          
+          <div class="chat-messages">
+            @if(selectedCharacter.conversation.messages.length === 0 && !sendingMessage) {
+              <div class="no-messages">
+                <p>No messages yet. Start the conversation!</p>
+              </div>
+            } @else {
+              @for(message of selectedCharacter.conversation.messages; track message.id) {
+                <div class="message" [class.user]="message.sender === 'user'" [class.character]="message.sender === 'character'">
+                  <div class="message-content">
+                    <p>{{ message.message_text }}</p>
+                    <span class="message-time">{{ formatDate(message.created_at) }}</span>
+                  </div>
+                </div>
+              }
+              @if(sendingMessage) {
+                <div class="message character">
+                  <div class="message-content typing">
+                    <div class="typing-indicator">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                </div>
+              }
+            }
+          </div>
+
+          @if(chatError) {
+            <div class="chat-error">
+              <p>{{ chatError }}</p>
+            </div>
+          }
+
+          @if(messagesRemaining !== null) {
+            <div class="messages-remaining">
+              {{ messagesRemaining }} message{{ messagesRemaining !== 1 ? 's' : '' }} remaining with this character
+            </div>
+          }
+
+          <div class="chat-input">
+            <input 
+              type="text" 
+              [(ngModel)]="chatMessage"
+              placeholder="Type your message..."
+              (keyup.enter)="sendMessage()"
+              [disabled]="sendingMessage || messagesRemaining === 0"
+            />
+            <button class="send-btn" (click)="sendMessage()" [disabled]="!chatMessage.trim() || sendingMessage || messagesRemaining === 0">
+              @if(sendingMessage) {
+                <div class="btn-spinner"></div>
+              } @else {
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Guess Confirmation Modal -->
+    @if(characterToGuess) {
+      <div class="modal-overlay" (click)="closeGuessConfirm()">
+        <div class="confirm-modal" (click)="$event.stopPropagation()">
+          <div class="confirm-icon warning">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </div>
+          <h3>Confirm Your Guess</h3>
+          <p>Are you sure <strong>{{ characterToGuess.name }}</strong> is the impostor?</p>
+          <p class="warning-text">This will end the game. This action cannot be undone.</p>
+          <div class="confirm-actions">
+            <button class="btn-cancel" (click)="closeGuessConfirm()" [disabled]="guessing">Cancel</button>
+            <button class="btn-confirm" (click)="confirmGuess()" [disabled]="guessing">
+              @if(guessing) {
+                <div class="btn-spinner"></div>
+                Guessing...
+              } @else {
+                Confirm Guess
+              }
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Guess Result Modal -->
+    @if(guessResult) {
+      <div class="modal-overlay">
+        <div class="result-modal" [class.correct]="guessResult.is_correct" [class.wrong]="!guessResult.is_correct">
+          <div class="result-icon">
+            @if(guessResult.is_correct) {
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            } @else {
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="15" y1="9" x2="9" y2="15"></line>
+                <line x1="9" y1="9" x2="15" y2="15"></line>
+              </svg>
+            }
+          </div>
+          <h2>{{ guessResult.is_correct ? 'Congratulations!' : 'Wrong Guess!' }}</h2>
+          <p class="result-message">{{ guessMessage }}</p>
+          
+          <div class="result-details">
+            <div class="result-item">
+              <span class="label">Your guess:</span>
+              <span class="value">{{ guessResult.guessed_character.name }}</span>
+            </div>
+            <div class="result-item">
+              <span class="label">Actual impostor:</span>
+              <span class="value impostor">{{ guessResult.actual_impostor.name }}</span>
+            </div>
+          </div>
+
+          <button class="btn-close-result" (click)="closeGuessResult()">Close</button>
+        </div>
+      </div>
+    }
+  }
+}

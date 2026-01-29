@@ -1,0 +1,55 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse } from '../interfaces/all-interfaces';
+
+@Injectable({
+  providedIn: 'root',
+})
+export class GameService {
+  private apiUrl = 'http://127.0.0.1:8000/api';
+
+  constructor(private http: HttpClient) {}
+
+  // Get all games for the current user
+  getGames(): Observable<GamesListResponse> {
+    return this.http.get<GamesListResponse>(`${this.apiUrl}/games`);
+  }
+
+  // Get a specific game by ID
+  getGame(gameId: number): Observable<GameDetailResponse> {
+    return this.http.get<GameDetailResponse>(`${this.apiUrl}/games/${gameId}`);
+  }
+
+  // Start a new game
+  startGame(aiModelId?: number): Observable<GameStartResponse> {
+    const payload: GameStartRequest = {};
+    
+    if (aiModelId !== undefined) {
+      payload.ai_model_id = aiModelId;
+    }
+
+    return this.http.post<GameStartResponse>(
+      `${this.apiUrl}/games/start`, 
+      payload
+    );
+  }
+
+  // Send a message to a character in a game
+  sendMessage(gameId: number, characterId: number, message: string): Observable<SendMessageResponse> {
+    const payload: SendMessageRequest = { message };
+    return this.http.post<SendMessageResponse>(
+      `${this.apiUrl}/games/${gameId}/characters/${characterId}/message`,
+      payload
+    );
+  }
+
+  // Guess the impostor
+  guessImpostor(gameId: number, characterId: number): Observable<GuessResponse> {
+    const payload: GuessRequest = { character_id: characterId };
+    return this.http.post<GuessResponse>(
+      `${this.apiUrl}/games/${gameId}/guess`,
+      payload
+    );
+  }
+}

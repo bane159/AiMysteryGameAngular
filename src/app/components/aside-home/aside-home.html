@@ -1,0 +1,46 @@
+<aside class="games-sidebar">
+    <div class="sidebar-header">
+        <h2>Your Games</h2>
+    </div>
+
+    <div class="games-list">
+        @if (!isLoggedIn) {
+            <div class="login-prompt">
+                <p>Log in to see your games</p>
+            </div>
+        } @else if (isLoading) {
+            <div class="loading">
+                <p>Loading games...</p>
+            </div>
+        } @else if (games.length === 0) {
+            <div class="no-games">
+                <p>No games yet. Start a new game!</p>
+            </div>
+        } @else {
+            @for (game of games; track game.id) {
+                <a 
+                    [routerLink]="['/game', game.id]"
+                    class="game-card"
+                    [class.finished]="game.is_finished"
+                >
+                    <div class="game-header">
+                        <h3>Game #{{ game.id }}</h3>
+                        <span class="status-badge" [class.finished]="game.is_finished">
+                            {{ game.is_finished ? 'Finished' : 'In Progress' }}
+                        </span>
+                    </div>
+                    <div class="game-info">
+                        <p class="ai-model">🤖 {{ game.ai_model.name }}</p>
+                        <p class="impostor">🎭 Impostor: {{ game.impostor?.name ? game.impostor?.name : "Unknown" }}</p>
+                    </div>
+                    <div class="game-meta">
+                        <span class="date">📅 {{ formatDate(game.created_at) }}</span>
+                        @if (game.is_finished && game.finished_at) {
+                            <span class="finished-date">✅ {{ formatDate(game.finished_at) }}</span>
+                        }
+                    </div>
+                </a>
+            }
+        }
+    </div>
+</aside>

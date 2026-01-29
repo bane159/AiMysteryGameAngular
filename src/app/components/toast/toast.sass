@@ -1,0 +1,81 @@
+.toast-container
+  position: fixed
+  top: 1rem
+  right: 1rem
+  z-index: 1000000000000000000000000
+  display: flex
+  flex-direction: column
+  gap: 0.5rem
+  max-width: 400px
+
+.toast
+  display: flex
+  align-items: center
+  gap: 0.75rem
+  padding: 1rem 1.25rem
+  border-radius: 8px
+  background: rgba(30, 30, 40, 0.95)
+  backdrop-filter: blur(10px)
+  border: 1px solid rgba(255, 255, 255, 0.1)
+  color: white
+  cursor: pointer
+  animation: slideIn 0.3s ease-out
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3)
+
+  &:hover
+    transform: translateX(-5px)
+    transition: transform 0.2s ease
+
+  .toast-icon
+    font-size: 1.25rem
+    flex-shrink: 0
+
+  .toast-message
+    flex: 1
+    font-size: 0.9rem
+    line-height: 1.4
+
+  .toast-close
+    background: none
+    border: none
+    color: rgba(255, 255, 255, 0.6)
+    font-size: 1.5rem
+    cursor: pointer
+    padding: 0
+    line-height: 1
+    transition: color 0.2s ease
+
+    &:hover
+      color: white
+
+.toast-success
+  border-left: 4px solid #4ade80
+
+  .toast-icon
+    color: #4ade80
+
+.toast-error
+  border-left: 4px solid #f87171
+
+  .toast-icon
+    color: #f87171
+
+.toast-warning
+  border-left: 4px solid #fbbf24
+
+  .toast-icon
+    color: #fbbf24
+
+.toast-info
+  border-left: 4px solid #60a5fa
+
+  .toast-icon
+    color: #60a5fa
+
+@keyframes slideIn
+  from
+    opacity: 0
+    transform: translateX(100%)
+  to
+    opacity: 1
+    transform: translateX(0)

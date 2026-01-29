@@ -1,0 +1,39 @@
+<div class="game-header">
+
+  <ul>
+    <li>    
+        <a [routerLink]="'/'">Home</a>
+    </li>
+      @if(!isLoggedIn){
+    <li>    
+        <a [routerLink]="'/register'">Register</a>
+
+    </li>
+    <li>    
+        <a [routerLink]="'/login'">Login</a>
+    </li>
+      }
+    
+     
+
+
+    @if(isLoggedIn){
+    <li>    
+        <a [routerLink]="'/game'">Game</a>
+    </li>
+    <li>    
+        <a (click)="onStartGame()" style="cursor: pointer;">Start Game</a>
+    </li>
+     <li>    
+        <a (click)="onLogout()" style="cursor: pointer;">Logoff</a>
+    </li>
+    <li>    
+        <a [routerLink]="'/account'">Account</a>
+    </li>
+  }
+     
+  </ul>
+  <div class="game-status">
+    <span class="status-badge">Working</span>
+  </div>
+</div>

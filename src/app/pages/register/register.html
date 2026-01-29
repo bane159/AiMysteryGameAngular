@@ -1,0 +1,80 @@
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <h1>Create Account</h1>
+      <p>Join the mystery game adventure</p>
+    </div>
+
+    <form class="register-form" (ngSubmit)="onRegister()" #registerForm="ngForm">
+      <div class="form-group">
+        <label for="name">Username</label>
+        <input 
+          type="text" 
+          id="name" 
+          name="name"
+          [(ngModel)]="formData.name"
+          required
+          placeholder="Enter your username"
+          [class.error]="errors?.name">
+        <span class="error-message" *ngIf="errors?.name">{{ errors?.name }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email"
+          [(ngModel)]="formData.email"
+          required
+          placeholder="Enter your email"
+          [class.error]="errors?.email">
+        <span class="error-message" *ngIf="errors?.email">{{ errors?.email }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          name="password"
+          [(ngModel)]="formData.password"
+          required
+          minlength="8"
+          placeholder="Enter your password (min 8 characters)"
+          [class.error]="errors?.password">
+        <span class="error-message" *ngIf="errors?.password">{{  errors?.password }}</span>
+      </div>
+
+      <div class="form-group">
+        <label for="password_confirmation">Confirm Password</label>
+        <input 
+          type="password" 
+          id="password_confirmation" 
+          name="password_confirmation"
+          [(ngModel)]="formData.password_confirmation"
+          required
+          minlength="8"
+          placeholder="Confirm your password">
+      </div>
+
+      <div class="form-actions">
+        <button 
+          type="submit" 
+          class="register-btn"
+          [disabled]="isLoading || !registerForm.valid">
+          <span *ngIf="!isLoading">Register</span>
+          <span *ngIf="isLoading">⏳ Creating account...</span>
+        </button>
+      </div>
+
+      <div class="success-message" *ngIf="successMessage">
+        ✓ {{ successMessage }}
+      </div>
+
+      <div class="form-footer">
+        <p>Already have an account? <a routerLink="/login">Login here</a></p>
+      </div>
+    </form>
+  </div>
+</div>

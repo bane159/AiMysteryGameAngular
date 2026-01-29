@@ -1,0 +1,40 @@
+.layout-container
+  display: flex
+  height: 100vh
+  overflow: hidden
+  margin: 0
+  padding: 0
+
+.main-content
+  flex: 1
+  background: linear-gradient(135deg, #0c0c18, #0e0e1a)
+  overflow-y: auto
+  display: flex
+  flex-direction: column
+
+  &::-webkit-scrollbar
+    width: 8px
+  
+  &::-webkit-scrollbar-track
+    background: rgba(0, 0, 0, 0.05)
+  
+  &::-webkit-scrollbar-thumb
+    background: rgba(0, 0, 0, 0.2)
+    border-radius: 4px
+
+.content-area
+  flex: 1
+  overflow-y: auto
+
+// Responsive - stack vertically on mobile
+@media (max-width: 992px)
+  .layout-container
+    flex-direction: column
+    height: auto
+    min-height: 100vh
+    overflow: visible
+
+  .main-content
+    flex: 1
+    min-height: 0
+    overflow: visible

@@ -1,0 +1,18 @@
+- make an endpoint that gets all games for the corresponding logged in user for the aside home with simple info like created at, finished ta (if the game was finished) impostor name and id, and used ai_model. DONE
+
+-in frontend make aside-home list all user games if he is logged in but if he is not logged in make it say smt like log in bla bla  DONE
+
+-when clicked on the link in aside-home, it would take him to game page, with info about that game, and state of that game. (/game/game_id)   Done
+
+
+- make an endpoint that gets specifix info about a single game. DONE
+
+- change game page so that it actually displays good info about the current game. DONE
+
+- implement chatting with the llm ()
+
+- implement an api endpoint that saves messages and returns the ai response.
+
+
+- implement guessing api endpoint that returns weather the guess was correct or not.
+
