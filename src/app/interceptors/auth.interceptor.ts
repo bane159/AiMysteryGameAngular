@@ -26,6 +26,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         authService.logoutLocal();
         toastService.warning('Your session has expired. Please log in again.', 6000);
       }
+      if(error.status === 406) {
+        authService.logoutLocal();
+        toastService.error('Email Or Password is incorrect. Try again.', 6000);
+      
+      }
+
       return throwError(() => error);
     })
   );

@@ -3,19 +3,20 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { 
-  User, 
-  LoginResponse, 
-  RegisterResponse, 
-  LogoutResponse, 
-  MeResponse 
+import {
+  User,
+  LoginResponse,
+  RegisterResponse,
+  LogoutResponse,
+  MeResponse
 } from '../interfaces/all-interfaces';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://127.0.0.1:8000/api';
+  private apiUrl = environment.apiUrl;
   private tokenKey = 'jwt_token';
   private userKey = 'user';
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
@@ -34,7 +35,7 @@ export class AuthService {
       tap(response => {
         if (response.success && response.token && response.user) {
           this.setSession(response.token, response.user);
-          console.log('User logged in:', response);
+          
         }
       })
     );
@@ -51,7 +52,7 @@ export class AuthService {
       tap(response => {
         if (response.success && response.token && response.user) {
           this.setSession(response.token, response.user);
-          console.log('User registered:', response);
+          
         }
       })
     );
@@ -62,8 +63,7 @@ export class AuthService {
     const headers = this.getAuthHeaders();
     return this.http.post<LogoutResponse>(`${this.apiUrl}/logout`, {}, { headers }).pipe(
       tap(() => {
-        this.clearSession();
-        console.log('User logged out');
+        this.logoutLocal();
       })
     );
   }

@@ -20,6 +20,7 @@ export class Register {
   };
 
   errors: ValidationErrors | null = null;
+  generalError: string = '';
   successMessage: string = '';
   isLoading: boolean = false;
 
@@ -29,9 +30,38 @@ export class Register {
   ) {}
 
   onRegister() {
-    this.isLoading = true;
     this.errors = null;
+    this.generalError = '';
     this.successMessage = '';
+
+    const validationErrors: ValidationErrors = {};
+
+    if (!this.formData.name.trim()) {
+      validationErrors.name = ['The name field is required.'];
+    }
+
+    if (!this.formData.email.trim()) {
+      validationErrors.email = ['The email field is required.'];
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.formData.email)) {
+      validationErrors.email = ['The email field must be a valid email address.'];
+    }
+
+    if (!this.formData.password) {
+      validationErrors.password = ['The password field is required.'];
+    } else if (this.formData.password.length < 8) {
+      validationErrors.password = ['The password must be at least 8 characters.'];
+    }
+
+    if (this.formData.password && this.formData.password !== this.formData.password_confirmation) {
+      validationErrors['password_confirmation'] = ['The password confirmation does not match.'];
+    }
+
+    if (Object.keys(validationErrors).length > 0) {
+      this.errors = validationErrors;
+      return;
+    }
+
+    this.isLoading = true;
 
     this.authService.register(
       this.formData.name,
@@ -46,7 +76,7 @@ export class Register {
 
           // Redirect to home after 2 seconds
           setTimeout(() => {
-            this.router.navigate(['/home']);
+            this.router.navigate(['/']);
           }, 2000);
         }
       },
@@ -55,7 +85,7 @@ export class Register {
         if (error.status === 422 && error.error?.errors) {
           this.errors = error.error.errors;
         } else {
-          this.errors = { general: ['An error occurred. Please try again.'] };
+          this.generalError = 'An error occurred. Please try again.';
         }
       }
     });

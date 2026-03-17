@@ -16,7 +16,9 @@
           required
           placeholder="Enter your email"
           [class.error]="errors?.email">
-        <span class="error-message" *ngIf="errors?.email">{{ errors?.email }}</span>
+          @if(errors?.email){
+            <span class="error-message">{{errors?.email}}</span>
+          }
       </div>
 
       <div class="form-group">
@@ -29,12 +31,17 @@
           required
           placeholder="Enter your password"
           [class.error]="errors?.password">
-        <span class="error-message" *ngIf="errors?.password">{{ errors?.password }}</span>
+          @if (errors?.password) {
+            <span class="error-message">{{ errors?.password }}</span>
+          }
       </div>
+      
 
-        <!-- <div class="error-message general-error" *ngIf="errors?.general">
-            {{ errors?.general }} -->
-      <!-- </div> -->
+      @if (generalError) {
+        <div class="error-message general-error">
+            {{ generalError }}
+        </div>
+      }
 
       <div class="form-actions">
         <button 

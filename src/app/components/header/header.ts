@@ -3,6 +3,7 @@ import { RouterLink, Router } from "@angular/router";
 import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
 import { Subscription } from 'rxjs';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-header',
@@ -17,7 +18,8 @@ export class Header implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private gameService: GameService,
-    private router: Router
+    private router: Router,
+    private toastService: ToastService
   ) {}
 
 
@@ -35,11 +37,23 @@ export class Header implements OnInit, OnDestroy {
           console.log('Rooms with Rules:', response.game.rooms_with_rules);
           console.log('Character Scenarios:', response.game.character_scenarios);
           console.log('Created At:', response.game.created_at);
+
+          // Get the updated list of games and emit to subs
+          this.gameService.getGames().subscribe({
+            next: (gamesResponse) => {
+              if (gamesResponse.success && gamesResponse.games) {
+                this.gameService.updateGames(gamesResponse.games);
+              }
+            }
+          });
+
+          this.router.navigate(['/game', response.game.id]);
+
         }
       },
       error: (error) => {
         console.error('Failed to start game - Full error:', error);
-        alert('Failed to start game. Please try again.');
+        this.toastService.error('Failed to start game. Please try again later.', 6000);
       }
     });
   }
@@ -47,13 +61,13 @@ export class Header implements OnInit, OnDestroy {
   onLogout() {
     this.authService.logout().subscribe({
       next: (response) => {
-        console.log('Logout successful:', response.message);
+       
         this.router.navigate(['/login']);
       },
       error: (error) => {
         console.error('Logout error:', error);
-        // Clear session even if API call fails
-        this.authService.logout();
+        
+        this.authService.logoutLocal(); 
         this.router.navigate(['/login']);
       }
     });

@@ -56,10 +56,10 @@ export class Game implements OnInit {
     });
   }
 
-  // ngOnDestroy(): void {
-  //   this.destroy$.next();
-  //   this.destroy$.complete();
-  // }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
   loadGame(): void {
     if (!this.gameId) return;

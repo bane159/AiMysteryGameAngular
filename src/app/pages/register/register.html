@@ -55,8 +55,18 @@
           [(ngModel)]="formData.password_confirmation"
           required
           minlength="8"
-          placeholder="Confirm your password">
+          placeholder="Confirm your password"
+          [class.error]="errors?.['password_confirmation']">
+          @if (errors?.['password_confirmation']) {
+            <span class="error-message">{{ errors?.['password_confirmation'] }}</span>
+          }
       </div>
+
+      @if (generalError) {
+        <div class="error-message general-error">
+            {{ generalError }}
+        </div>
+      }
 
       <div class="form-actions">
         <button 

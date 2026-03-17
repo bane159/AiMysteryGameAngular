@@ -26,9 +26,20 @@ export class AsideHome implements OnInit {
       this.isLoggedIn = loggedIn;
       if (loggedIn) {
         this.loadGames();
+
+        
+        this.gameService.games$.subscribe(games => {
+        this.games = games;
+      });
+
+
       } else {
         this.games = [];
       }
+
+      
+
+
     });
   }
 
@@ -49,6 +60,8 @@ export class AsideHome implements OnInit {
       }
     });
   }
+
+
 
   formatDate(dateString: string): string {
     const date = new Date(dateString);

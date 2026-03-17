@@ -1,15 +1,21 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse } from '../interfaces/all-interfaces';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse, GameListItem } from '../interfaces/all-interfaces';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GameService {
-  private apiUrl = 'http://127.0.0.1:8000/api';
+  private apiUrl = environment.apiUrl;
 
   constructor(private http: HttpClient) {}
+
+
+  private gamesSubject = new BehaviorSubject<GameListItem[]>([]);
+  games$ = this.gamesSubject.asObservable();
+
 
   // Get all games for the current user
   getGames(): Observable<GamesListResponse> {
@@ -19,6 +25,10 @@ export class GameService {
   // Get a specific game by ID
   getGame(gameId: number): Observable<GameDetailResponse> {
     return this.http.get<GameDetailResponse>(`${this.apiUrl}/games/${gameId}`);
+  }
+
+  updateGames(games: GameListItem[]): void {
+    this.gamesSubject.next(games);
   }
 
   // Start a new game
