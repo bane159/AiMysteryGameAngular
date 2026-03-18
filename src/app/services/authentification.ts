@@ -8,7 +8,11 @@ import {
   LoginResponse,
   RegisterResponse,
   LogoutResponse,
-  MeResponse
+  MeResponse,
+  UpdateProfileResponse,
+  ChangePasswordResponse,
+  UpdateProfileRequest,
+  ChangePasswordRequest
 } from '../interfaces/all-interfaces';
 import { environment } from '../../environments/environment';
 
@@ -84,6 +88,39 @@ export class AuthService {
         }
       })
     );
+  }
+
+  // Update username and email for current user
+  updateProfile(name: string, email: string): Observable<UpdateProfileResponse> {
+    const headers = this.getAuthHeaders();
+    const payload: UpdateProfileRequest = {
+      name,
+      email
+    };
+
+    return this.http.put<UpdateProfileResponse>(`${this.apiUrl}/me`, payload, { headers }).pipe(
+      tap(response => {
+        if (response.success && response.user) {
+          this.updateCurrentUser(response.user);
+        }
+      })
+    );
+  }
+
+  // Change current user password
+  changePassword(
+    current_password: string,
+    password: string,
+    password_confirmation: string
+  ): Observable<ChangePasswordResponse> {
+    const headers = this.getAuthHeaders();
+    const payload: ChangePasswordRequest = {
+      current_password,
+      password,
+      password_confirmation
+    };
+
+    return this.http.put<ChangePasswordResponse>(`${this.apiUrl}/me/password`, payload, { headers });
   }
 
   // Get stored token

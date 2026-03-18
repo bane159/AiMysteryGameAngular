@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse, GameListItem } from '../interfaces/all-interfaces';
+import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse, GameListItem, DeleteGameResponse } from '../interfaces/all-interfaces';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -25,6 +25,11 @@ export class GameService {
   // Get a specific game by ID
   getGame(gameId: number): Observable<GameDetailResponse> {
     return this.http.get<GameDetailResponse>(`${this.apiUrl}/games/${gameId}`);
+  }
+
+  // Delete a game by ID
+  deleteGame(gameId: number): Observable<DeleteGameResponse> {
+    return this.http.delete<DeleteGameResponse>(`${this.apiUrl}/games/${gameId}`);
   }
 
   updateGames(games: GameListItem[]): void {

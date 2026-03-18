@@ -42,6 +42,8 @@ export interface ValidationErrors {
   name?: string[];
   email?: string[];
   password?: string[];
+  current_password?: string[];
+  password_confirmation?: string[];
   [key: string]: string[] | undefined;
 }
 
@@ -57,6 +59,34 @@ export interface RegisterRequest {
   email: string;
   password: string;
   password_confirmation: string;
+}
+
+// Update profile payload
+export interface UpdateProfileRequest {
+  name: string;
+  email: string;
+}
+
+// Response for profile update endpoint
+export interface UpdateProfileResponse {
+  success: boolean;
+  message?: string;
+  user?: User;
+  errors?: ValidationErrors;
+}
+
+// Change password payload
+export interface ChangePasswordRequest {
+  current_password: string;
+  password: string;
+  password_confirmation: string;
+}
+
+// Response for password update endpoint
+export interface ChangePasswordResponse {
+  success: boolean;
+  message?: string;
+  errors?: ValidationErrors;
 }
 
 // Game-related interfaces
@@ -162,6 +192,12 @@ export interface GameListItem {
 export interface GamesListResponse {
   success: boolean;
   games: GameListItem[];
+}
+
+// Response for deleting a game
+export interface DeleteGameResponse {
+  success: boolean;
+  message?: string;
 }
 
 // Single game detail interfaces

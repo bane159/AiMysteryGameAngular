@@ -1,1 +1,129 @@
-<p>account works!</p>
+<div class="account-container">
+	<div class="account-card">
+		<div class="account-header">
+			<h1>My Account</h1>
+			<p>Update your username, email address and password.</p>
+			@if (currentUser) {
+				<span class="current-user-info">Signed in as {{ currentUser.name }} ({{ currentUser.email }})</span>
+			}
+		</div>
+
+		<section class="account-section">
+			<h2>Profile Details</h2>
+			<form class="account-form" (ngSubmit)="onUpdateProfile()" #profileForm="ngForm">
+				<div class="form-group">
+					<label for="name">Username</label>
+					<input
+						type="text"
+						id="name"
+						name="name"
+						[(ngModel)]="profileFormData.name"
+						required
+						placeholder="Enter your username"
+						[class.error]="profileErrors?.name"
+					>
+					@if (profileErrors?.name) {
+						<span class="error-message">{{ profileErrors?.name }}</span>
+					}
+				</div>
+
+				<div class="form-group">
+					<label for="email">Email</label>
+					<input
+						type="email"
+						id="email"
+						name="email"
+						[(ngModel)]="profileFormData.email"
+						required
+						placeholder="Enter your email"
+						[class.error]="profileErrors?.email"
+					>
+					@if (profileErrors?.email) {
+						<span class="error-message">{{ profileErrors?.email }}</span>
+					}
+				</div>
+
+				@if (profileGeneralError) {
+					<div class="error-message general-error">{{ profileGeneralError }}</div>
+				}
+
+				@if (profileSuccessMessage) {
+					<div class="success-message">{{ profileSuccessMessage }}</div>
+				}
+
+				<button type="submit" class="btn btn-primary" [disabled]="isProfileLoading || !profileForm.valid">
+					<span *ngIf="!isProfileLoading">Save Profile</span>
+					<span *ngIf="isProfileLoading">Saving...</span>
+				</button>
+			</form>
+		</section>
+
+		<section class="account-section">
+			<h2>Change Password</h2>
+			<form class="account-form" (ngSubmit)="onChangePassword()" #passwordForm="ngForm">
+				<div class="form-group">
+					<label for="current_password">Current Password</label>
+					<input
+						type="password"
+						id="current_password"
+						name="current_password"
+						[(ngModel)]="passwordFormData.current_password"
+						required
+						placeholder="Enter your current password"
+						[class.error]="passwordErrors?.current_password"
+					>
+					@if (passwordErrors?.current_password) {
+						<span class="error-message">{{ passwordErrors?.current_password }}</span>
+					}
+				</div>
+
+				<div class="form-group">
+					<label for="password">New Password</label>
+					<input
+						type="password"
+						id="password"
+						name="password"
+						[(ngModel)]="passwordFormData.password"
+						required
+						minlength="8"
+						placeholder="Enter new password"
+						[class.error]="passwordErrors?.password"
+					>
+					@if (passwordErrors?.password) {
+						<span class="error-message">{{ passwordErrors?.password }}</span>
+					}
+				</div>
+
+				<div class="form-group">
+					<label for="password_confirmation">Confirm New Password</label>
+					<input
+						type="password"
+						id="password_confirmation"
+						name="password_confirmation"
+						[(ngModel)]="passwordFormData.password_confirmation"
+						required
+						minlength="8"
+						placeholder="Confirm your new password"
+						[class.error]="passwordErrors?.password_confirmation"
+					>
+					@if (passwordErrors?.password_confirmation) {
+						<span class="error-message">{{ passwordErrors?.password_confirmation }}</span>
+					}
+				</div>
+
+				@if (passwordGeneralError) {
+					<div class="error-message general-error">{{ passwordGeneralError }}</div>
+				}
+
+				@if (passwordSuccessMessage) {
+					<div class="success-message">{{ passwordSuccessMessage }}</div>
+				}
+
+				<button type="submit" class="btn btn-primary" [disabled]="isPasswordLoading || !passwordForm.valid">
+					<span *ngIf="!isPasswordLoading">Change Password</span>
+					<span *ngIf="isPasswordLoading">Updating...</span>
+				</button>
+			</form>
+		</section>
+	</div>
+</div>

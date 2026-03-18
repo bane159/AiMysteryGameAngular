@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
 import { GameListItem } from '../../interfaces/all-interfaces';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-aside-home',
@@ -15,10 +16,15 @@ export class AsideHome implements OnInit {
   games: GameListItem[] = [];
   isLoggedIn = false;
   isLoading = false;
+  isDeleteModalOpen = false;
+  isDeleting = false;
+  selectedGameForDelete: GameListItem | null = null;
 
   constructor(
     private authService: AuthService,
-    private gameService: GameService
+    private gameService: GameService,
+    private toastService: ToastService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -49,6 +55,7 @@ export class AsideHome implements OnInit {
       next: (response) => {
         if (response.success) {
           this.games = response.games;
+          this.gameService.updateGames(response.games);
             
         
         }
@@ -57,6 +64,51 @@ export class AsideHome implements OnInit {
       error: (error) => {
         console.error('Error loading games:', error);
         this.isLoading = false;
+      }
+    });
+  }
+
+  openDeleteModal(game: GameListItem, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedGameForDelete = game;
+    this.isDeleteModalOpen = true;
+  }
+
+  closeDeleteModal(): void {
+    if (this.isDeleting) {
+      return;
+    }
+
+    this.isDeleteModalOpen = false;
+    this.selectedGameForDelete = null;
+  }
+
+  confirmDeleteGame(): void {
+    if (!this.selectedGameForDelete || this.isDeleting) {
+      return;
+    }
+
+    const gameId = this.selectedGameForDelete.id;
+    this.isDeleting = true;
+
+    this.gameService.deleteGame(gameId).subscribe({
+      next: (response) => {
+        this.isDeleting = false;
+        this.games = this.games.filter(game => game.id !== gameId);
+        this.gameService.updateGames(this.games);
+
+        if (this.router.url === `/game/${gameId}`) {
+          this.router.navigate(['/']);
+        }
+
+        this.toastService.success(response.message || `Game #${gameId} deleted.`);
+        this.closeDeleteModal();
+      },
+      error: (error) => {
+        this.isDeleting = false;
+        const message = error?.error?.message || `Failed to delete game #${gameId}.`;
+        this.toastService.error(message);
       }
     });
   }

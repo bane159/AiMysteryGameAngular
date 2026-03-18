@@ -18,29 +18,66 @@
             </div>
         } @else {
             @for (game of games; track game.id) {
-                <a 
-                    [routerLink]="['/game', game.id]"
-                    class="game-card"
-                    [class.finished]="game.is_finished"
-                >
-                    <div class="game-header">
-                        <h3>Game #{{ game.id }}</h3>
-                        <span class="status-badge" [class.finished]="game.is_finished">
-                            {{ game.is_finished ? 'Finished' : 'In Progress' }}
-                        </span>
-                    </div>
-                    <div class="game-info">
-                        <p class="ai-model">🤖 {{ game.ai_model.name }}</p>
-                        <p class="impostor">🎭 Impostor: {{ game.impostor?.name ? game.impostor?.name : "Unknown" }}</p>
-                    </div>
-                    <div class="game-meta">
-                        <span class="date">📅 {{ formatDate(game.created_at) }}</span>
-                        @if (game.is_finished && game.finished_at) {
-                            <span class="finished-date">✅ {{ formatDate(game.finished_at) }}</span>
-                        }
-                    </div>
-                </a>
+                <div class="game-card-wrapper">
+                    <a 
+                        [routerLink]="['/game', game.id]"
+                        class="game-card"
+                        [class.finished]="game.is_finished"
+                    >
+                        <div class="game-header">
+                            <h3>Game #{{ game.id }}</h3>
+                            <span class="status-badge" [class.finished]="game.is_finished">
+                                {{ game.is_finished ? 'Finished' : 'In Progress' }}
+                            </span>
+                        </div>
+                        <div class="game-info">
+                            <p class="ai-model">🤖 {{ game.ai_model.name }}</p>
+                            <p class="impostor">🎭 Impostor: {{ game.impostor?.name ? game.impostor?.name : "Unknown" }}</p>
+                        </div>
+                        <div class="game-meta">
+                            <span class="date">📅 {{ formatDate(game.created_at) }}</span>
+                            @if (game.is_finished && game.finished_at) {
+                                <span class="finished-date">✅ {{ formatDate(game.finished_at) }}</span>
+                            }
+                        </div>
+                    </a>
+
+                    <button
+                        type="button"
+                        class="delete-game-btn"
+                        (click)="openDeleteModal(game, $event)"
+                        aria-label="Delete game"
+                        title="Delete game"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 6h18"></path>
+                            <path d="M8 6V4h8v2"></path>
+                            <path d="M19 6l-1 14H6L5 6"></path>
+                            <path d="M10 11v6"></path>
+                            <path d="M14 11v6"></path>
+                        </svg>
+                    </button>
+                </div>
             }
         }
     </div>
 </aside>
+
+@if (isDeleteModalOpen && selectedGameForDelete) {
+    <div class="delete-modal-backdrop" (click)="closeDeleteModal()">
+        <div class="delete-modal" (click)="$event.stopPropagation()">
+            <h3>Delete Game #{{ selectedGameForDelete.id }}?</h3>
+            <p>This action cannot be undone.</p>
+
+            <div class="delete-modal-actions">
+                <button type="button" class="cancel-btn" (click)="closeDeleteModal()" [disabled]="isDeleting">
+                    Cancel
+                </button>
+                <button type="button" class="confirm-delete-btn" (click)="confirmDeleteGame()" [disabled]="isDeleting">
+                    <span *ngIf="!isDeleting">Delete</span>
+                    <span *ngIf="isDeleting">Deleting...</span>
+                </button>
+            </div>
+        </div>
+    </div>
+}

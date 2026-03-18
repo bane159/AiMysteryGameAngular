@@ -61,11 +61,7 @@
     padding: 1rem
     margin-bottom: 0.75rem
     cursor: pointer
-    transition: all 0.3s ease
-
-    &:hover
-      background: rgba(255, 255, 255, 0.1)
-      transform: translateX(5px)
+    transition: background 0.3s ease
 
     &.finished
       border-left: 3px solid #4ade80
@@ -120,6 +116,109 @@
       .finished-date
         color: #4ade80
 
+  .game-card-wrapper
+    position: relative
+    margin-bottom: 0.75rem
+    transition: transform 0.3s ease
+
+    &:hover
+      transform: translateX(5px)
+
+      .game-card
+        background: rgba(255, 255, 255, 0.1)
+
+    .game-card
+      margin-bottom: 0
+      padding-bottom: 2rem
+
+  .delete-game-btn
+    position: absolute
+    right: 0.75rem
+    bottom: 0.65rem
+    border: none
+    background: transparent
+    padding: 0
+    line-height: 0
+    color: #ef4444
+    display: inline-flex
+    align-items: center
+    justify-content: center
+    cursor: pointer
+    transition: all 0.2s ease
+
+    svg
+      width: 1rem
+      height: 1rem
+
+    &:hover
+      color: #f87171
+
+    &:active
+      transform: scale(0.97)
+
+.delete-modal-backdrop
+  position: fixed
+  inset: 0
+  background: rgba(0, 0, 0, 0.55)
+  backdrop-filter: blur(2px)
+  display: flex
+  align-items: center
+  justify-content: center
+  z-index: 1200
+  padding: 1rem
+
+.delete-modal
+  width: 100%
+  max-width: 360px
+  background: linear-gradient(135deg, #1a1a2e, #151326)
+  border: 1px solid rgba(255, 255, 255, 0.14)
+  border-radius: 14px
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45)
+  padding: 1.25rem
+
+  h3
+    margin: 0 0 0.55rem 0
+    color: #fff
+    font-size: 1.05rem
+
+  p
+    margin: 0
+    color: rgba(255, 255, 255, 0.72)
+    font-size: 0.9rem
+
+  .delete-modal-actions
+    margin-top: 1rem
+    display: flex
+    justify-content: flex-end
+    gap: 0.6rem
+
+  .cancel-btn,
+  .confirm-delete-btn
+    border: none
+    border-radius: 8px
+    padding: 0.55rem 0.9rem
+    font-size: 0.85rem
+    cursor: pointer
+    transition: all 0.2s ease
+
+    &:disabled
+      opacity: 0.6
+      cursor: not-allowed
+
+  .cancel-btn
+    background: rgba(255, 255, 255, 0.12)
+    color: rgba(255, 255, 255, 0.9)
+
+    &:hover:not(:disabled)
+      background: rgba(255, 255, 255, 0.2)
+
+  .confirm-delete-btn
+    background: rgba(239, 68, 68, 0.88)
+    color: #fff
+
+    &:hover:not(:disabled)
+      background: rgba(220, 38, 38, 0.92)
+
 @media (max-width: 992px)
   :host
     width: 100%
@@ -138,7 +237,9 @@
       gap: 0.75rem
       padding: 0.5rem
 
-      .game-card
+      .game-card-wrapper
         min-width: 250px
         flex-shrink: 0
-        margin-bottom: 0
+
+        .game-card
+          margin-bottom: 0
