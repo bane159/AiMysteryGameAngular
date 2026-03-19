@@ -4,6 +4,7 @@ import { RouterLink, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
+import { ToastService } from '../../services/toast.service';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { GameDetail, GameCharacter, RoomWithRules, GuessResult, CharacterScenario } from '../../interfaces/all-interfaces';
 
@@ -38,9 +39,14 @@ export class Game implements OnInit {
   guessMessage: string | null = null;
   guessScenarios: CharacterScenario[] = [];
 
+  // Notes state
+  gameNotes = '';
+  notesSaving = false;
+
   constructor(
     private authService: AuthService,
     private gameService: GameService,
+    private toastService: ToastService,
     private route: ActivatedRoute
   ) {
     this.isLoggedIn$ = this.authService.isLoggedIn$();
@@ -82,11 +88,12 @@ export class Game implements OnInit {
               character_scenarios: responseScenarios,
             };
 
-            console.log(responseScenarios);
             // Auto-select first room if available
             if (this.game.rooms_with_rules?.length > 0) {
               this.selectedRoom = this.game.rooms_with_rules[0];
             }
+
+            this.loadNotesForCurrentGame();
           } else {
             this.error = response.message || 'Failed to load game';
           }
@@ -191,8 +198,47 @@ export class Game implements OnInit {
     this.guessScenarios = [];
   }
 
+  updateNotes(): void {
+    if (!this.gameId || this.notesSaving) {
+      return;
+    }
+
+    const userId = this.getCurrentUserId();
+    if (!userId) {
+      this.toastService.error('You must be logged in to save notes.');
+      return;
+    }
+
+    this.notesSaving = true;
+    const savedLocal = this.gameService.saveGameNotes(userId, this.gameId, this.gameNotes);
+    this.notesSaving = false;
+
+    if (savedLocal) {
+      this.toastService.success('Notes updated and saved locally for this game.');
+      return;
+    }
+
+    this.toastService.error('Failed to save notes locally.');
+  }
+
   get finishedGameScenarios(): CharacterScenario[] {
     return this.game?.character_scenarios ?? [];
+  }
+
+  getScenarioMomentLabel(index: number, totalSteps: number): string {
+    if (index === 0) {
+      return 'At the beginning';
+    }
+
+    if (index === totalSteps - 1) {
+      return 'Finally';
+    }
+
+    if (index === 1) {
+      return 'Then';
+    }
+
+    return 'After that';
   }
 
   formatDate(dateString: string | null): string {
@@ -200,6 +246,20 @@ export class Game implements OnInit {
       return 'Just now';
     }
     return new Date(dateString).toLocaleString();
+  }
+
+  private loadNotesForCurrentGame(): void {
+    if (!this.gameId) {
+      this.gameNotes = '';
+      return;
+    }
+
+    const userId = this.getCurrentUserId();
+    this.gameNotes = this.gameService.getGameNotes(userId, this.gameId);
+  }
+
+  private getCurrentUserId(): number | null {
+    return this.authService.getCurrentUser()?.id ?? null;
   }
   
 }

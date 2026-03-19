@@ -116,7 +116,7 @@
     @if(game.is_finished && finishedGameScenarios.length > 0) {
       <section class="finished-scenarios-section">
         <div class="section-header">
-          <h2>Character Scenarios</h2>
+          <h2>Game Scenarios</h2>
           <p>Final movement timeline for each character after the game ended.</p>
         </div>
 
@@ -131,15 +131,17 @@
               </header>
 
               <div class="scenario-steps-page">
-                @for(step of scenario.steps; track step.step_order) {
+                @for(step of scenario.steps; track step.step_order; let i = $index) {
                   <div class="scenario-step-page" [class.violation-step-page]="step.action.is_violation">
-                    <div class="step-order-page">Step {{ step.step_order }}</div>
-                    <p><strong>Room:</strong> {{ step.room.name }}</p>
-                    <p><strong>Rule:</strong> {{ step.rule.rule_text }}</p>
-                    <p><strong>Action:</strong> {{ step.action.action_text }}</p>
-                    @if(step.action.is_violation) {
-                      <span class="violation-badge-page">Rule violation</span>
-                    }
+                    <div class="step-moment-page">{{ getScenarioMomentLabel(i, scenario.steps.length) }}</div>
+                    <p class="step-story-page">
+                      {{ scenario.character.name }} was in <strong>{{ step.room.name }}</strong> and did:
+                      <span class="action-quote-page">"{{ step.action.action_text }}"</span>
+                    </p>
+                    <p class="step-rule-page"><strong>Room rule:</strong> {{ step.rule.rule_text }}</p>
+                    <span class="violation-badge-page" [class.safe-badge-page]="!step.action.is_violation">
+                      {{ step.action.is_violation ? 'Violated the rule' : 'Followed the rule' }}
+                    </span>
                   </div>
                 }
               </div>
@@ -193,36 +195,61 @@
       </div>
     </section>
 
-    <!-- Characters Section -->
-    <section class="characters-section">
-      <h2>Characters</h2>
-      <div class="characters-container">
-        @for(character of game.characters; track character.id; let i = $index) {
-          <div 
-            class="character-card"
-            [style.border-color]="['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'][i % 7]">
-            <div class="character-avatar" [style.background-color]="['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'][i % 7]">
-              <span class="avatar-initial">{{ character.name.charAt(0) }}</span>
+    <section class="characters-notes-layout">
+      <!-- Characters Section -->
+      <section class="characters-section">
+        <h2>Characters</h2>
+        <div class="characters-container">
+          @for(character of game.characters; track character.id; let i = $index) {
+            <div 
+              class="character-card"
+              [style.border-color]="['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'][i % 7]">
+              <div class="character-avatar" [style.background-color]="['#3b82f6', '#ec4899', '#8b5cf6', '#f59e0b', '#10b981', '#ef4444', '#06b6d4'][i % 7]">
+                <span class="avatar-initial">{{ character.name.charAt(0) }}</span>
+              </div>
+              <div class="character-info">
+                <h4>{{ character.name }}</h4>
+                <p class="character-personality">{{ character.personality_description | slice:0:80 }}{{ character.personality_description.length > 80 ? '...' : '' }}</p>
+                @if(character.conversation.messages.length > 0) {
+                  <div class="message-count">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    {{ character.conversation.messages.length }} messages
+                  </div>
+                }
+              </div>
+              <div class="character-actions">
+                <button class="interact-btn" (click)="selectCharacter(character)" [disabled]="game.is_finished">Talk</button>
+                <button class="guess-btn" (click)="openGuessConfirm(character)" [disabled]="game.is_finished">Guess Impostor</button>
+              </div>
             </div>
-            <div class="character-info">
-              <h4>{{ character.name }}</h4>
-              <p class="character-personality">{{ character.personality_description | slice:0:80 }}{{ character.personality_description.length > 80 ? '...' : '' }}</p>
-              @if(character.conversation.messages.length > 0) {
-                <div class="message-count">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                  </svg>
-                  {{ character.conversation.messages.length }} messages
-                </div>
-              }
-            </div>
-            <div class="character-actions">
-              <button class="interact-btn" (click)="selectCharacter(character)" [disabled]="game.is_finished">Talk</button>
-              <button class="guess-btn" (click)="openGuessConfirm(character)" [disabled]="game.is_finished">Guess Impostor</button>
-            </div>
+          }
+        </div>
+      </section>
+
+      <section class="notes-section">
+        <div class="notes-header-row">
+          <div>
+            <h2>Investigation Notes</h2>
+            <p>Write down suspicious behavior and clues for this game.</p>
           </div>
-        }
-      </div>
+        </div>
+
+        <div class="notes-editor">
+          <textarea
+            [(ngModel)]="gameNotes"
+            placeholder="Start writing your notes here..."
+            rows="12"
+          ></textarea>
+
+          <div class="notes-actions">
+            <button class="update-notes-btn" (click)="updateNotes()" [disabled]="notesSaving">
+              {{ notesSaving ? 'Updating...' : 'Update Notes' }}
+            </button>
+          </div>
+        </div>
+      </section>
     </section>
 
     <!-- Chat Modal -->
@@ -385,17 +412,17 @@
                     </header>
 
                     <div class="scenario-steps">
-                      @for(step of scenario.steps; track step.step_order) {
+                      @for(step of scenario.steps; track step.step_order; let i = $index) {
                         <div class="scenario-step" [class.violation-step]="step.action.is_violation">
-                          <div class="step-order">Step {{ step.step_order }}</div>
-                          <div class="step-content">
-                            <p><strong>Room:</strong> {{ step.room.name }}</p>
-                            <p><strong>Rule:</strong> {{ step.rule.rule_text }}</p>
-                            <p><strong>Action:</strong> {{ step.action.action_text }}</p>
-                            @if(step.action.is_violation) {
-                              <span class="violation-badge">Rule violation</span>
-                            }
-                          </div>
+                          <div class="step-moment">{{ getScenarioMomentLabel(i, scenario.steps.length) }}</div>
+                          <p class="step-story">
+                            {{ scenario.character.name }} was in <strong>{{ step.room.name }}</strong> and did:
+                            <span class="action-quote">"{{ step.action.action_text }}"</span>
+                          </p>
+                          <p class="step-rule"><strong>Room rule:</strong> {{ step.rule.rule_text }}</p>
+                          <span class="violation-badge" [class.safe-badge]="!step.action.is_violation">
+                            {{ step.action.is_violation ? 'Violated the rule' : 'Followed the rule' }}
+                          </span>
                         </div>
                       }
                     </div>

@@ -164,6 +164,34 @@ export class GameService {
     );
   }
 
+  getGameNotes(userId: number | null, gameId: number): string {
+    const key = this.getGameNotesStorageKey(userId, gameId);
+    if (!key) {
+      return '';
+    }
+
+    return localStorage.getItem(key) ?? '';
+  }
+
+  saveGameNotes(userId: number | null, gameId: number, notes: string): boolean {
+    const key = this.getGameNotesStorageKey(userId, gameId);
+    if (!key) {
+      return false;
+    }
+
+    try {
+      if (notes.trim()) {
+        localStorage.setItem(key, notes);
+      } else {
+        localStorage.removeItem(key);
+      }
+
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   private loadFavorites(): void {
     this.favoriteGameIds.clear();
 
@@ -200,5 +228,13 @@ export class GameService {
     }
 
     return `favorite_games_user_${this.currentUserId}`;
+  }
+
+  private getGameNotesStorageKey(userId: number | null, gameId: number): string | null {
+    if (!userId || !gameId) {
+      return null;
+    }
+
+    return `game_notes_user_${userId}_game_${gameId}`;
   }
 }
