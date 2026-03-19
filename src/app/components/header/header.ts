@@ -1,19 +1,32 @@
 import { Component, Input, OnInit, OnDestroy } from '@angular/core';
 import { RouterLink, Router } from "@angular/router";
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
 import { Subscription } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
+import { GameOptionItem } from '../../interfaces/all-interfaces';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink],
+  imports: [RouterLink, FormsModule],
   templateUrl: './header.html',
   styleUrl: './header.sass',
 })
 export class Header implements OnInit, OnDestroy {
   public isLoggedIn: boolean = false;
   private authSubscription?: Subscription;
+
+  isStartGameModalOpen = false;
+  loadingGameOptions = false;
+  startingGame = false;
+  startGameError: string | null = null;
+
+  aiModelOptions: GameOptionItem[] = [];
+  difficultyOptions: GameOptionItem[] = [];
+
+  selectedAiModel: number | null = null;
+  selectedDifficulty = '';
 
   constructor(
     private authService: AuthService,
@@ -25,18 +38,35 @@ export class Header implements OnInit, OnDestroy {
 
 
 
-  onStartGame() {
-    this.gameService.startGame().subscribe({
+  openStartGameModal() {
+    this.isStartGameModalOpen = true;
+    this.startGameError = null;
+    this.fetchGameOptions();
+  }
+
+  closeStartGameModal() {
+    if (this.startingGame) {
+      return;
+    }
+
+    this.isStartGameModalOpen = false;
+    this.startGameError = null;
+  }
+
+  startGameFromModal() {
+    if (this.startingGame || this.selectedAiModel === null || !this.selectedDifficulty) {
+      return;
+    }
+
+    this.startingGame = true;
+    this.startGameError = null;
+
+    this.gameService.startGame(this.selectedAiModel, this.selectedDifficulty).subscribe({
       next: (response) => {
-        console.log('Game started successfully - Full response:', response);
+        this.startingGame = false;
+
         if (response.success && response.game) {
-          console.log('Game ID:', response.game.id);
-          console.log('User:', response.game.user);
-          console.log('AI Model:', response.game.ai_model);
-          console.log('Characters:', response.game.characters);
-          console.log('Rooms with Rules:', response.game.rooms_with_rules);
-          console.log('Character Scenarios:', response.game.character_scenarios);
-          console.log('Created At:', response.game.created_at);
+          this.isStartGameModalOpen = false;
 
           // Get the updated list of games and emit to subs
           this.gameService.getGames().subscribe({
@@ -49,10 +79,15 @@ export class Header implements OnInit, OnDestroy {
 
           this.router.navigate(['/game', response.game.id]);
 
+          return;
+
         }
+
+        this.startGameError = response.message || 'Unable to start game with selected options.';
       },
       error: (error) => {
-        console.error('Failed to start game - Full error:', error);
+        this.startingGame = false;
+        this.startGameError = error.error?.message || 'Failed to start game. Please try again later.';
         this.toastService.error('Failed to start game. Please try again later.', 6000);
       }
     });
@@ -86,6 +121,40 @@ export class Header implements OnInit, OnDestroy {
   ngOnDestroy() {
     // Clean up subscription
     this.authSubscription?.unsubscribe();
+  }
+
+  private fetchGameOptions() {
+    this.loadingGameOptions = true;
+    this.startGameError = null;
+
+    this.gameService.getGameOptions().subscribe({
+      next: (response) => {
+        this.loadingGameOptions = false;
+
+        if (!response.success || !response.options) {
+          this.startGameError = 'Could not load game options.';
+          return;
+        }
+
+        this.aiModelOptions = response.options.ai_models || [];
+        this.difficultyOptions = response.options.difficulties || [];
+
+        if (this.aiModelOptions.length > 0) {
+          const firstModelValue = this.aiModelOptions[0].value;
+          this.selectedAiModel = typeof firstModelValue === 'number'
+            ? firstModelValue
+            : Number(firstModelValue);
+        }
+
+        if (this.difficultyOptions.length > 0) {
+          this.selectedDifficulty = String(this.difficultyOptions[0].value);
+        }
+      },
+      error: () => {
+        this.loadingGameOptions = false;
+        this.startGameError = 'Could not load game options.';
+      }
+    });
   }
 
  

@@ -22,7 +22,7 @@
         <a [routerLink]="'/game'">Game</a>
     </li>
     <li>    
-        <a (click)="onStartGame()" style="cursor: pointer;">Start Game</a>
+      <a (click)="openStartGameModal()" style="cursor: pointer;">Start Game</a>
     </li>
      <li>    
         <a (click)="onLogout()" style="cursor: pointer;">Logoff</a>
@@ -37,3 +37,58 @@
     <span class="status-badge">Working</span>
   </div>
 </div>
+
+@if(isStartGameModalOpen) {
+  <div class="start-game-modal-overlay" (click)="closeStartGameModal()">
+    <div class="start-game-modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Start New Game</h3>
+        <button class="close-modal-btn" (click)="closeStartGameModal()" [disabled]="startingGame">x</button>
+      </div>
+
+      @if(loadingGameOptions) {
+        <p class="modal-status">Loading options...</p>
+      } @else {
+        <div class="modal-field">
+          <label for="ai-model-select">AI Model</label>
+          <select
+            id="ai-model-select"
+            [(ngModel)]="selectedAiModel"
+            [disabled]="startingGame || aiModelOptions.length === 0">
+            @for(option of aiModelOptions; track option.value) {
+              <option [ngValue]="option.value">{{ option.text }}</option>
+            }
+          </select>
+          <p class="field-help">Different AI models can change how characters reason, respond, and mislead.</p>
+        </div>
+
+        <div class="modal-field">
+          <label for="difficulty-select">Difficulty</label>
+          <select
+            id="difficulty-select"
+            [(ngModel)]="selectedDifficulty"
+            [disabled]="startingGame || difficultyOptions.length === 0">
+            @for(option of difficultyOptions; track option.value) {
+              <option [value]="option.value">{{ option.text }}</option>
+            }
+          </select>
+          <p class="field-help">Difficulty controls how obvious clues are and how challenging deduction becomes.</p>
+        </div>
+      }
+
+      @if(startGameError) {
+        <p class="modal-error">{{ startGameError }}</p>
+      }
+
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="closeStartGameModal()" [disabled]="startingGame">Cancel</button>
+        <button
+          class="btn-start"
+          (click)="startGameFromModal()"
+          [disabled]="startingGame || loadingGameOptions || selectedAiModel === null || !selectedDifficulty">
+          {{ startingGame ? 'Starting...' : 'Start Game' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

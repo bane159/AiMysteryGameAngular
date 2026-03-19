@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse, GameListItem, DeleteGameResponse } from '../interfaces/all-interfaces';
+import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse, GameListItem, DeleteGameResponse, GameOptionsResponse } from '../interfaces/all-interfaces';
 import { environment } from '../../environments/environment';
 
 export type GameStatusFilter = 'all' | 'in-progress' | 'finished' | 'favorites';
@@ -133,17 +133,25 @@ export class GameService {
   }
 
   // Start a new game
-  startGame(aiModelId?: number): Observable<GameStartResponse> {
+  startGame(aiModelId?: number, difficulty?: string): Observable<GameStartResponse> {
     const payload: GameStartRequest = {};
     
     if (aiModelId !== undefined) {
       payload.ai_model_id = aiModelId;
     }
 
+    if (difficulty) {
+      payload.difficulty = difficulty;
+    }
+
     return this.http.post<GameStartResponse>(
       `${this.apiUrl}/games/start`, 
       payload
     );
+  }
+
+  getGameOptions(): Observable<GameOptionsResponse> {
+    return this.http.get<GameOptionsResponse>(`${this.apiUrl}/games/options`);
   }
 
   // Send a message to a character in a game

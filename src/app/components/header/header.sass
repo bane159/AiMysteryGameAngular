@@ -93,3 +93,107 @@
       li a
         padding: 0.35rem 0.6rem
         font-size: 0.85rem
+
+.start-game-modal-overlay
+  position: fixed
+  inset: 0
+  background: rgba(0, 0, 0, 0.72)
+  backdrop-filter: blur(3px)
+  display: flex
+  align-items: center
+  justify-content: center
+  z-index: 200
+
+.start-game-modal
+  width: min(92vw, 560px)
+  background: linear-gradient(135deg, #141425, #1a1a2e)
+  border: 1px solid rgba(147, 51, 234, 0.35)
+  border-radius: 14px
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45)
+  padding: 1.25rem
+
+  .modal-header
+    display: flex
+    align-items: center
+    justify-content: space-between
+    margin-bottom: 1rem
+
+    h3
+      margin: 0
+      color: #ddd6fe
+      font-size: 1.2rem
+
+    .close-modal-btn
+      border: none
+      background: transparent
+      color: #a78bfa
+      font-size: 1.25rem
+      cursor: pointer
+
+      &:disabled
+        opacity: 0.5
+        cursor: not-allowed
+
+  .modal-status
+    margin: 0.5rem 0 0.75rem 0
+    color: #9ca3af
+
+  .modal-field
+    margin-bottom: 1rem
+
+    label
+      display: block
+      color: #c4b5fd
+      font-weight: 600
+      margin-bottom: 0.4rem
+
+    select
+      width: 100%
+      border: 1px solid rgba(147, 51, 234, 0.35)
+      background: rgba(2, 6, 23, 0.55)
+      color: #e5e7eb
+      border-radius: 10px
+      padding: 0.65rem 0.75rem
+      outline: none
+
+      &:focus
+        border-color: #8b5cf6
+
+      &:disabled
+        opacity: 0.6
+
+    .field-help
+      margin: 0.45rem 0 0 0
+      color: #9ca3af
+      font-size: 0.85rem
+
+  .modal-error
+    color: #fca5a5
+    margin: 0.2rem 0 0.8rem 0
+    font-size: 0.9rem
+
+  .modal-actions
+    display: flex
+    justify-content: flex-end
+    gap: 0.65rem
+    margin-top: 0.35rem
+
+    .btn-cancel,
+    .btn-start
+      border: none
+      border-radius: 9px
+      padding: 0.55rem 0.95rem
+      font-weight: 600
+      cursor: pointer
+
+      &:disabled
+        opacity: 0.6
+        cursor: not-allowed
+
+    .btn-cancel
+      background: rgba(107, 114, 128, 0.25)
+      color: #d1d5db
+
+    .btn-start
+      background: linear-gradient(135deg, #8b5cf6, #6366f1)
+      color: white

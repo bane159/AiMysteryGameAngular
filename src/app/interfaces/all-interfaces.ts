@@ -205,6 +205,7 @@ export interface GameListItem {
 // Game request/response interfaces
 export interface GameStartRequest {
   ai_model_id?: number;
+  difficulty?: string;
 }
 
 export interface GameStartResponse {
@@ -212,6 +213,21 @@ export interface GameStartResponse {
   message: string;
   game?: Game;
   error?: string;
+}
+
+export interface GameOptionItem {
+  value: number | string;
+  text: string;
+}
+
+export interface GameOptions {
+  ai_models: GameOptionItem[];
+  difficulties: GameOptionItem[];
+}
+
+export interface GameOptionsResponse {
+  success: boolean;
+  options: GameOptions;
 }
 
 export interface GamesListResponse {
