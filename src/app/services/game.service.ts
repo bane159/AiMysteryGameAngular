@@ -4,11 +4,22 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse, GameListItem, DeleteGameResponse } from '../interfaces/all-interfaces';
 import { environment } from '../../environments/environment';
 
+export type GameStatusFilter = 'all' | 'in-progress' | 'finished' | 'favorites';
+export type GameSortOrder = 'newest' | 'oldest';
+
+export interface GameListViewOptions {
+  searchQuery: string;
+  statusFilter: GameStatusFilter;
+  sortOrder: GameSortOrder;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class GameService {
   private apiUrl = environment.apiUrl;
+  private currentUserId: number | null = null;
+  private favoriteGameIds = new Set<number>();
 
   constructor(private http: HttpClient) {}
 
@@ -27,13 +38,98 @@ export class GameService {
     return this.http.get<GameDetailResponse>(`${this.apiUrl}/games/${gameId}`);
   }
 
-  // Delete a game by ID
+
   deleteGame(gameId: number): Observable<DeleteGameResponse> {
     return this.http.delete<DeleteGameResponse>(`${this.apiUrl}/games/${gameId}`);
   }
 
   updateGames(games: GameListItem[]): void {
     this.gamesSubject.next(games);
+  }
+
+  removeGameFromState(gameId: number): void {
+    const updatedGames = this.gamesSubject.value.filter((game) => game.id !== gameId);
+    this.gamesSubject.next(updatedGames);
+    this.removeFavorite(gameId);
+  }
+
+  initializeUserFavorites(userId: number | null): void {
+    this.currentUserId = userId;
+
+    if (!userId) {
+      this.favoriteGameIds.clear();
+      return;
+    }
+
+    this.loadFavorites();
+  }
+
+  clearUserFavorites(): void {
+    this.currentUserId = null;
+    this.favoriteGameIds.clear();
+  }
+
+  isFavorite(gameId: number): boolean {
+    return this.favoriteGameIds.has(gameId);
+  }
+
+  toggleFavorite(gameId: number): boolean {
+    if (this.favoriteGameIds.has(gameId)) {
+      this.favoriteGameIds.delete(gameId);
+      this.persistFavorites();
+      return false;
+    }
+
+    this.favoriteGameIds.add(gameId);
+    this.persistFavorites();
+    return true;
+  }
+
+  removeFavorite(gameId: number): void {
+    if (!this.favoriteGameIds.has(gameId)) {
+      return;
+    }
+
+    this.favoriteGameIds.delete(gameId);
+    this.persistFavorites();
+  }
+
+  getDisplayedGames(games: GameListItem[], options: GameListViewOptions): GameListItem[] {
+    const query = options.searchQuery.trim().toLowerCase();
+
+    const filtered = games.filter((game) => {
+      if (options.statusFilter === 'finished' && !game.is_finished) {
+        return false;
+      }
+
+      if (options.statusFilter === 'in-progress' && game.is_finished) {
+        return false;
+      }
+
+      if (options.statusFilter === 'favorites' && !this.isFavorite(game.id)) {
+        return false;
+      }
+
+      if (!query) {
+        return true;
+      }
+
+      const impostorName = game.impostor?.name?.toLowerCase() || 'unknown';
+      return (`${game.id}`.includes(query) || impostorName.includes(query));
+    });
+
+    return filtered.sort((a, b) => {
+      const aFavorite = this.isFavorite(a.id);
+      const bFavorite = this.isFavorite(b.id);
+
+      if (aFavorite !== bFavorite) {
+        return aFavorite ? -1 : 1;
+      }
+
+      const first = new Date(a.created_at).getTime();
+      const second = new Date(b.created_at).getTime();
+      return options.sortOrder === 'newest' ? second - first : first - second;
+    });
   }
 
   // Start a new game
@@ -66,5 +162,43 @@ export class GameService {
       `${this.apiUrl}/games/${gameId}/guess`,
       payload
     );
+  }
+
+  private loadFavorites(): void {
+    this.favoriteGameIds.clear();
+
+    const key = this.getFavoritesStorageKey();
+    if (!key) {
+      return;
+    }
+
+    const favorites = localStorage.getItem(key);
+    if (!favorites) {
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(favorites) as number[];
+      this.favoriteGameIds = new Set(parsed.filter((id) => Number.isInteger(id)));
+    } catch {
+      this.favoriteGameIds = new Set<number>();
+    }
+  }
+
+  private persistFavorites(): void {
+    const key = this.getFavoritesStorageKey();
+    if (!key) {
+      return;
+    }
+
+    localStorage.setItem(key, JSON.stringify(Array.from(this.favoriteGameIds)));
+  }
+
+  private getFavoritesStorageKey(): string | null {
+    if (!this.currentUserId) {
+      return null;
+    }
+
+    return `favorite_games_user_${this.currentUserId}`;
   }
 }

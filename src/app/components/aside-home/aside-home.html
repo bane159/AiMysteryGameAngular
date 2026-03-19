@@ -3,6 +3,32 @@
         <h2>Your Games</h2>
     </div>
 
+    @if (isLoggedIn && games.length > 0) {
+        <div class="games-controls">
+            <input
+                type="text"
+                class="search-input"
+                [(ngModel)]="searchQuery"
+                placeholder="Search by game # or impostor"
+                aria-label="Search games"
+            >
+
+            <div class="controls-row">
+                <select [(ngModel)]="statusFilter" aria-label="Filter games by status">
+                    <option value="all">All</option>
+                    <option value="in-progress">In progress</option>
+                    <option value="finished">Finished</option>
+                    <option value="favorites">Favorites</option>
+                </select>
+
+                <select [(ngModel)]="sortOrder" aria-label="Sort games">
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                </select>
+            </div>
+        </div>
+    }
+
     <div class="games-list">
         @if (!isLoggedIn) {
             <div class="login-prompt">
@@ -16,13 +42,18 @@
             <div class="no-games">
                 <p>No games yet. Start a new game!</p>
             </div>
+        } @else if (displayedGames.length === 0) {
+            <div class="no-games">
+                <p>No games match your search/filter.</p>
+            </div>
         } @else {
-            @for (game of games; track game.id) {
-                <div class="game-card-wrapper">
+            @for (game of displayedGames; track game.id) {
+                <div class="game-card-wrapper" #gameCardRef [attr.data-game-id]="game.id">
                     <a 
                         [routerLink]="['/game', game.id]"
                         class="game-card"
                         [class.finished]="game.is_finished"
+                        [class.favorite]="isFavorite(game.id)"
                     >
                         <div class="game-header">
                             <h3>Game #{{ game.id }}</h3>
@@ -42,21 +73,36 @@
                         </div>
                     </a>
 
-                    <button
-                        type="button"
-                        class="delete-game-btn"
-                        (click)="openDeleteModal(game, $event)"
-                        aria-label="Delete game"
-                        title="Delete game"
-                    >
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                            <path d="M3 6h18"></path>
-                            <path d="M8 6V4h8v2"></path>
-                            <path d="M19 6l-1 14H6L5 6"></path>
-                            <path d="M10 11v6"></path>
-                            <path d="M14 11v6"></path>
-                        </svg>
-                    </button>
+                    <div class="game-actions">
+                        <button
+                            type="button"
+                            class="favorite-game-btn"
+                            [class.active]="isFavorite(game.id)"
+                            (click)="toggleFavorite(game.id, $event)"
+                            aria-label="Toggle favorite"
+                            [title]="isFavorite(game.id) ? 'Remove from favorites' : 'Add to favorites'"
+                        >
+                            <svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path>
+                            </svg>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="delete-game-btn"
+                            (click)="openDeleteModal(game, $event)"
+                            aria-label="Delete game"
+                            title="Delete game"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 6h18"></path>
+                                <path d="M8 6V4h8v2"></path>
+                                <path d="M19 6l-1 14H6L5 6"></path>
+                                <path d="M10 11v6"></path>
+                                <path d="M14 11v6"></path>
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             }
         }
