@@ -89,20 +89,27 @@ export interface ChangePasswordResponse {
   errors?: ValidationErrors;
 }
 
-// Game-related interfaces
-export interface GameStartRequest {
-  ai_model_id?: number;
+// ==================== GAME DOMAIN INTERFACES ====================
+
+// Reference interfaces for minimal entity representations
+export interface UserReference {
+  id: number;
+  name: string;
 }
 
+export interface CharacterReference {
+  id: number;
+  name: string;
+}
+
+// Core domain entities
 export interface AIModel {
   id: number;
   name: string;
   provider: string;
 }
 
-export interface Character {
-  id: number;
-  name: string;
+export interface Character extends CharacterReference {
   personality_description: string;
   is_impostor?: boolean;
 }
@@ -112,6 +119,12 @@ export interface Rule {
   rule_text: string;
 }
 
+export interface Action {
+  id: number;
+  action_text: string;
+  is_violation: boolean;
+}
+
 export interface Room {
   id: number;
   name: string;
@@ -119,88 +132,20 @@ export interface Room {
   selected_rules?: Rule[];
 }
 
-export interface Action {
-  id: number;
-  action_text: string;
-  is_violation: boolean;
-}
-
+// Scenario-related interfaces
 export interface ScenarioStep {
   step_order: number;
-  room: {
-    id: number;
-    name: string;
-  };
-  rule: {
-    id: number;
-    rule_text: string;
-  };
-  action: {
-    id: number;
-    action_text: string;
-    is_violation: boolean;
-  };
+  room: Room;
+  rule: Rule;
+  action: Action;
 }
 
 export interface CharacterScenario {
-  character: {
-    id: number;
-    name: string;
-    is_impostor: boolean;
-  };
+  character: Character;
   steps: ScenarioStep[];
 }
 
-export interface Game {
-  id: number;
-  created_at: string;
-  user: {
-    id: number;
-    name: string;
-  };
-  ai_model: AIModel;
-  characters: Character[];
-  rooms_with_rules: Room[];
-  character_scenarios: CharacterScenario[];
- 
-}
-
-export interface GameStartResponse {
-  success: boolean;
-  message: string;
-  game?: Game;
-  error?: string;
-}
-
-// Game list item (for sidebar/history)
-export interface GameListItem {
-  id: number;
-  created_at: string;
-  finished_at: string | null;
-  is_finished: boolean;
-  impostor: {
-    id: number;
-    name: string;
-  } | null;
-  ai_model: {
-    id: number;
-    name: string;
-  };
-}
-
-// Response for games list endpoint
-export interface GamesListResponse {
-  success: boolean;
-  games: GameListItem[];
-}
-
-// Response for deleting a game
-export interface DeleteGameResponse {
-  success: boolean;
-  message?: string;
-}
-
-// Single game detail interfaces
+// Chat and conversation interfaces
 export interface ChatMessage {
   id: number;
   sender: 'user' | 'character';
@@ -213,23 +158,27 @@ export interface CharacterConversation {
   messages: ChatMessage[];
 }
 
-export interface GameCharacter {
-  id: number;
-  name: string;
-  personality_description: string;
+export interface GameCharacter extends Character {
   conversation: CharacterConversation;
 }
 
-export interface RoomRule {
-  id: number;
-  rule_text: string;
-}
-
+// Room display interface (used in game detail)
 export interface RoomWithRules {
   id: number;
   name: string;
   description: string;
-  rules: RoomRule[];
+  rules: Rule[];
+}
+
+// Game-related interfaces
+export interface Game {
+  id: number;
+  created_at: string;
+  user: UserReference;
+  ai_model: AIModel;
+  characters: Character[];
+  rooms_with_rules: Room[];
+  character_scenarios: CharacterScenario[];
 }
 
 export interface GameDetail {
@@ -240,16 +189,50 @@ export interface GameDetail {
   ai_model: AIModel;
   characters: GameCharacter[];
   rooms_with_rules: RoomWithRules[];
-  impostor:string | null;
+  impostor?: string | null;
+  character_scenarios?: CharacterScenario[];
+}
+
+export interface GameListItem {
+  id: number;
+  created_at: string;
+  finished_at: string | null;
+  is_finished: boolean;
+  impostor: CharacterReference | null;
+  ai_model: AIModel;
+}
+
+// Game request/response interfaces
+export interface GameStartRequest {
+  ai_model_id?: number;
+}
+
+export interface GameStartResponse {
+  success: boolean;
+  message: string;
+  game?: Game;
+  error?: string;
+}
+
+export interface GamesListResponse {
+  success: boolean;
+  games: GameListItem[];
+}
+
+export interface DeleteGameResponse {
+  success: boolean;
+  message?: string;
 }
 
 export interface GameDetailResponse {
   success: boolean;
   message?: string;
   game?: GameDetail;
+  impostor?: string;
+  character_scenarios?: CharacterScenario[];
 }
 
-// Send message interfaces
+// Message-related interfaces
 export interface SendMessageRequest {
   message: string;
 }
@@ -263,29 +246,26 @@ export interface SendMessageResponse {
   error?: string;
 }
 
-// Guess interfaces
+// Guess-related interfaces
 export interface GuessRequest {
   character_id: number;
 }
 
 export interface GuessResult {
   is_correct: boolean;
-  guessed_character: {
-    id: number;
-    name: string;
-  };
-  actual_impostor: {
-    id: number;
-    name: string;
-  };
+  guessed_character: CharacterReference;
+  actual_impostor: CharacterReference;
 }
 
 export interface GuessResponse {
   success: boolean;
   message: string;
   result?: GuessResult;
-  game?: {
-    id: number;
-    finished_at: string;
-  };
+  game?: GuessGameData;
+}
+
+export interface GuessGameData {
+  id: number;
+  finished_at: string | null;
+  character_scenarios: CharacterScenario[];
 }

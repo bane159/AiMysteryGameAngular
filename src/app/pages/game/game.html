@@ -113,6 +113,42 @@
       </div>
     </section>
 
+    @if(game.is_finished && finishedGameScenarios.length > 0) {
+      <section class="finished-scenarios-section">
+        <div class="section-header">
+          <h2>Character Scenarios</h2>
+          <p>Final movement timeline for each character after the game ended.</p>
+        </div>
+
+        <div class="scenarios-grid-page">
+          @for(scenario of finishedGameScenarios; track scenario.character.id) {
+            <article class="scenario-card-page" [class.impostor-card-page]="scenario.character.is_impostor">
+              <header class="scenario-card-header-page">
+                <h3>{{ scenario.character.name }}</h3>
+                @if(scenario.character.is_impostor) {
+                  <span class="impostor-badge-page">Impostor</span>
+                }
+              </header>
+
+              <div class="scenario-steps-page">
+                @for(step of scenario.steps; track step.step_order) {
+                  <div class="scenario-step-page" [class.violation-step-page]="step.action.is_violation">
+                    <div class="step-order-page">Step {{ step.step_order }}</div>
+                    <p><strong>Room:</strong> {{ step.room.name }}</p>
+                    <p><strong>Rule:</strong> {{ step.rule.rule_text }}</p>
+                    <p><strong>Action:</strong> {{ step.action.action_text }}</p>
+                    @if(step.action.is_violation) {
+                      <span class="violation-badge-page">Rule violation</span>
+                    }
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        </div>
+      </section>
+    }
+
     <!-- Map Section -->
     <section class="map-section">
       <h2>Rooms</h2>
@@ -334,6 +370,40 @@
               <span class="value impostor">{{ guessResult.actual_impostor.name }}</span>
             </div>
           </div>
+
+          @if(guessScenarios.length > 0) {
+            <div class="scenarios-block">
+              <h3>Scenario Reveal</h3>
+              <div class="scenarios-grid">
+                @for(scenario of guessScenarios; track scenario.character.id) {
+                  <article class="scenario-card" [class.impostor-card]="scenario.character.is_impostor">
+                    <header class="scenario-card-header">
+                      <h4>{{ scenario.character.name }}</h4>
+                      @if(scenario.character.is_impostor) {
+                        <span class="impostor-badge">Impostor</span>
+                      }
+                    </header>
+
+                    <div class="scenario-steps">
+                      @for(step of scenario.steps; track step.step_order) {
+                        <div class="scenario-step" [class.violation-step]="step.action.is_violation">
+                          <div class="step-order">Step {{ step.step_order }}</div>
+                          <div class="step-content">
+                            <p><strong>Room:</strong> {{ step.room.name }}</p>
+                            <p><strong>Rule:</strong> {{ step.rule.rule_text }}</p>
+                            <p><strong>Action:</strong> {{ step.action.action_text }}</p>
+                            @if(step.action.is_violation) {
+                              <span class="violation-badge">Rule violation</span>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </article>
+                }
+              </div>
+            </div>
+          }
 
           <button class="btn-close-result" (click)="closeGuessResult()">Close</button>
         </div>

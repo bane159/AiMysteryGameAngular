@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { GameDetail, GameCharacter, RoomWithRules, GuessResult } from '../../interfaces/all-interfaces';
+import { GameDetail, GameCharacter, RoomWithRules, GuessResult, CharacterScenario } from '../../interfaces/all-interfaces';
 
 @Component({
   selector: 'app-game',
@@ -36,6 +36,7 @@ export class Game implements OnInit {
   guessing = false;
   guessResult: GuessResult | null = null;
   guessMessage: string | null = null;
+  guessScenarios: CharacterScenario[] = [];
 
   constructor(
     private authService: AuthService,
@@ -73,7 +74,15 @@ export class Game implements OnInit {
         next: (response) => {
           this.loading = false;
           if (response.success && response.game) {
-            this.game = response.game;
+            const responseScenarios = response.character_scenarios ?? response.game.character_scenarios ?? [];
+
+            this.game = {
+              ...response.game,
+              impostor: response.impostor ?? response.game.impostor ?? null,
+              character_scenarios: responseScenarios,
+            };
+
+            console.log(responseScenarios);
             // Auto-select first room if available
             if (this.game.rooms_with_rules?.length > 0) {
               this.selectedRoom = this.game.rooms_with_rules[0];
@@ -164,6 +173,8 @@ export class Game implements OnInit {
             if (this.game && response.game) {
               this.game.is_finished = true;
               this.game.finished_at = response.game.finished_at;
+              this.game.character_scenarios = response.game.character_scenarios;
+              this.guessScenarios = response.game.character_scenarios;
             }
           }
         },
@@ -177,6 +188,11 @@ export class Game implements OnInit {
   closeGuessResult(): void {
     this.guessResult = null;
     this.guessMessage = null;
+    this.guessScenarios = [];
+  }
+
+  get finishedGameScenarios(): CharacterScenario[] {
+    return this.game?.character_scenarios ?? [];
   }
 
   formatDate(dateString: string | null): string {
