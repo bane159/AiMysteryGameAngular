@@ -51,9 +51,10 @@ export class Game implements OnInit {
   ) {
     this.isLoggedIn$ = this.authService.isLoggedIn$();
   }
-
+  
   ngOnInit(): void {
     // Subscribe to route params to get game ID
+    
     this.route.params.pipe(takeUntil(this.destroy$)).subscribe(params => {
       const id = params['id'];
       if (id) {

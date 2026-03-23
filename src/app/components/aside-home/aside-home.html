@@ -56,7 +56,7 @@
                         [class.favorite]="isFavorite(game.id)"
                     >
                         <div class="game-header">
-                            <h3>Game #{{ game.id }}</h3>
+                            <h3>Game #{{ game.number }}</h3>
                             <span class="status-badge" [class.finished]="game.is_finished">
                                 {{ game.is_finished ? 'Finished' : 'In Progress' }}
                             </span>

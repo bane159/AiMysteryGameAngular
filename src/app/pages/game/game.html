@@ -68,7 +68,7 @@
     <!-- Game Info Header -->
     <section class="game-header">
       <div class="game-info">
-        <h1>Game #{{ game.id }}</h1>
+        <h1>Game #{{ game.number }}</h1>
         <div class="game-meta">
           <span class="meta-item">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -101,7 +101,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
-            <!-- Messages Sent: {{ game.total_messages_sent }} -->
+            <!-- {{ game.total_messages_sent }} -->
            </span>
            @if(game.impostor) {
            <span class="meta-item"> 
@@ -195,8 +195,8 @@
       </div>
     </section>
 
+    <!-- Characters Section -->
     <section class="characters-notes-layout">
-      <!-- Characters Section -->
       <section class="characters-section">
         <h2>Characters</h2>
         <div class="characters-container">

@@ -183,6 +183,7 @@ export interface Game {
 
 export interface GameDetail {
   id: number;
+  number: number;
   created_at: string;
   finished_at: string | null;
   is_finished: boolean;
@@ -200,6 +201,7 @@ export interface GameListItem {
   is_finished: boolean;
   impostor: CharacterReference | null;
   ai_model: AIModel;
+  number: number;
 }
 
 // Game request/response interfaces
