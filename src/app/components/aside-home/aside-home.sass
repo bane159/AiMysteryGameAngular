@@ -284,23 +284,65 @@
   .games-sidebar
     width: 100%
     height: auto
-    max-height: 220px
+    max-height: none
     border-right: none
     border-bottom: 1px solid rgba(255, 255, 255, 0.1)
+
+    .sidebar-header
+      padding: 1rem 0.9rem 0.75rem
+
+      h2
+        font-size: 1.05rem
+
+    .games-controls
+      padding: 0.7rem 0.7rem 0.6rem
+      gap: 0.5rem
+
+      .search-input
+        font-size: 0.8rem
+
+      .controls-row
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+        gap: 0.5rem
+
+      select
+        min-width: 0
+        font-size: 0.76rem
+        padding: 0.45rem 0.5rem
 
     .games-list
       display: flex
       overflow-x: auto
       overflow-y: hidden
       gap: 0.75rem
-      padding: 0.5rem
+      padding: 0.6rem 0.7rem 0.8rem
+      min-height: 188px
+      scroll-padding-inline: 0.7rem
+      align-items: stretch
+
+      .login-prompt,
+      .loading,
+      .no-games
+        min-width: 100%
+        padding: 1rem 0.5rem
+        font-size: 0.85rem
 
       .game-card-wrapper
-        min-width: 250px
+        min-width: clamp(220px, 72vw, 280px)
         flex-shrink: 0
+        display: flex
 
         .game-card
           margin-bottom: 0
+          width: 100%
+          .game-meta
+            margin-top: auto
 
+@media (max-width: 540px)
+  .games-sidebar
     .games-controls
-      padding: 0.75rem
+      .controls-row
+        grid-template-columns: 1fr
+
+      select
+        width: 100%

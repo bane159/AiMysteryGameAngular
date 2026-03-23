@@ -115,7 +115,7 @@ export class GameService {
       }
 
       const impostorName = game.impostor?.name?.toLowerCase() || 'unknown';
-      return (`${game.id}`.includes(query) || impostorName.includes(query));
+      return (`${game.number}`.includes(query) || impostorName.includes(query));
     });
 
     return filtered.sort((a, b) => {

@@ -19,9 +19,6 @@
 
     @if(isLoggedIn){
     <li>    
-        <a [routerLink]="'/game'">Game</a>
-    </li>
-    <li>    
       <a (click)="openStartGameModal()" style="cursor: pointer;">Start Game</a>
     </li>
      <li>    
@@ -33,9 +30,6 @@
   }
      
   </ul>
-  <div class="game-status">
-    <span class="status-badge">Working</span>
-  </div>
 </div>
 
 @if(isStartGameModalOpen) {
