@@ -39,9 +39,11 @@ export class Header implements OnInit, OnDestroy {
 
 
   openStartGameModal() {
-    this.isStartGameModalOpen = true;
-    this.startGameError = null;
-    this.fetchGameOptions();
+    if(this.isLoggedIn) {
+      this.isStartGameModalOpen = true;
+      this.startGameError = null;
+      this.fetchGameOptions();
+    }
   }
 
   closeStartGameModal() {
@@ -119,7 +121,6 @@ export class Header implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Clean up subscription
     this.authSubscription?.unsubscribe();
   }
 

@@ -52,8 +52,11 @@
 				}
 
 				<button type="submit" class="btn btn-primary" [disabled]="isProfileLoading || !profileForm.valid">
-					<span *ngIf="!isProfileLoading">Save Profile</span>
-					<span *ngIf="isProfileLoading">Saving...</span>
+					@if (!isProfileLoading) {
+						<span>Save Profile</span>
+					} @else {
+						<span>Saving...</span>
+					}
 				</button>
 			</form>
 		</section>
@@ -120,8 +123,11 @@
 				}
 
 				<button type="submit" class="btn btn-primary" [disabled]="isPasswordLoading || !passwordForm.valid">
-					<span *ngIf="!isPasswordLoading">Change Password</span>
-					<span *ngIf="isPasswordLoading">Updating...</span>
+					@if (!isPasswordLoading) {
+						<span>Change Password</span>
+					} @else {
+						<span>Updating...</span>
+					}
 				</button>
 			</form>
 		</section>

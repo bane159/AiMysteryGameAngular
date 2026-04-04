@@ -6,7 +6,7 @@ import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
 import { ToastService } from '../../services/toast.service';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { GameDetail, GameCharacter, RoomWithRules, GuessResult, CharacterScenario } from '../../interfaces/all-interfaces';
+import { GameDetail, GameCharacter, RoomWithRules, GuessResult, CharacterScenario, ChatMessage } from '../../interfaces/all-interfaces';
 
 @Component({
   selector: 'app-game',
@@ -126,29 +126,54 @@ export class Game implements OnInit {
     if (!this.chatMessage.trim() || !this.selectedCharacter || !this.gameId || this.sendingMessage) return;
     
     const messageText = this.chatMessage.trim();
+    const character = this.selectedCharacter;
+
     this.chatMessage = '';
     this.sendingMessage = true;
     this.chatError = null;
 
-    this.gameService.sendMessage(this.gameId, this.selectedCharacter.id, messageText)
+    // Show user message immediately (optimistic)
+    const tempUserMessage: ChatMessage = {
+      id: -Date.now(),
+      sender: 'user',
+      message_text: messageText,
+      created_at: new Date().toISOString(),
+    };
+    character.conversation.messages.push(tempUserMessage);
+
+    this.gameService.sendMessage(this.gameId, character.id, messageText)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           this.sendingMessage = false;
           if (response.success && response.user_message && response.ai_response) {
-            // Add both messages to the conversation
-            if (this.selectedCharacter) {
-              this.selectedCharacter.conversation.messages.push(response.user_message);
-              this.selectedCharacter.conversation.messages.push(response.ai_response);
+            // Replace temp with real user message
+            const idx = character.conversation.messages.indexOf(tempUserMessage);
+            if (idx !== -1) {
+              character.conversation.messages[idx] = response.user_message;
             }
-            this.messagesRemaining = response.messages_remaining ?? null;
+            // Push AI response onto the captured character
+            character.conversation.messages.push(response.ai_response);
+
+            if (this.selectedCharacter?.id === character.id) {
+              this.messagesRemaining = response.messages_remaining ?? null;
+            }
           } else {
-            this.chatError = response.message || 'Failed to send message';
+            // Remove optimistic message on failure
+            const idx = character.conversation.messages.indexOf(tempUserMessage);
+            if (idx !== -1) character.conversation.messages.splice(idx, 1);
+            if (this.selectedCharacter?.id === character.id) {
+              this.chatError = response.message || 'Failed to send message';
+            }
           }
         },
         error: (err) => {
           this.sendingMessage = false;
-          this.chatError = err.error?.message || 'Failed to send message';
+          const idx = character.conversation.messages.indexOf(tempUserMessage);
+          if (idx !== -1) character.conversation.messages.splice(idx, 1);
+          if (this.selectedCharacter?.id === character.id) {
+            this.chatError = err.error?.message || 'Failed to send message';
+          }
         }
       });
   }

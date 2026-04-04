@@ -63,7 +63,8 @@
   <section class="features-section">
     <h2 class="section-title">Game Features</h2>
     <div class="features-grid">
-      <div class="feature-card" *ngFor="let feature of features">
+      @for (feature of features; track feature.icon) {
+      <div class="feature-card">
         <div class="feature-icon" [ngClass]="'icon-' + feature.icon">
           @switch(feature.icon) {
             @case('detective') {
@@ -99,6 +100,7 @@
         <h3>{{ feature.title }}</h3>
         <p>{{ feature.description }}</p>
       </div>
+      }
     </div>
   </section>
 
@@ -107,7 +109,8 @@
     <h2 class="section-title">Join Our Community</h2>
     <p class="social-description">Connect with other detectives, share strategies, and stay updated on new features.</p>
     <div class="social-links">
-      <a *ngFor="let social of socialLinks" [href]="social.url" class="social-btn" [ngClass]="'social-' + social.icon">
+      @for (social of socialLinks; track social.name) {
+      <a [href]="social.url" class="social-btn" [ngClass]="'social-' + social.icon">
         @switch(social.icon) {
           @case('discord') {
             <svg viewBox="0 0 24 24" fill="currentColor">
@@ -127,6 +130,7 @@
         }
         <span>{{ social.name }}</span>
       </a>
+      }
     </div>
   </section>
 
@@ -134,10 +138,5 @@
   <section class="cta-section">
     <h2>Ready to Find the Impostor?</h2>
     <p>Test your detective skills and see if you can identify the rule-breaker.</p>
-    @if(isLoggedIn$ | async) {
-      <a routerLink="/game" class="btn-primary btn-large">Start Playing</a>
-    } @else {
-      <a routerLink="/register" class="btn-primary btn-large">Create Free Account</a>
-    }
   </section>
 </div>

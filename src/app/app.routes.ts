@@ -10,11 +10,11 @@ export const routes: Routes = [
         path: '',
         loadComponent: () => import('./pages/landing/landing').then(m => m.Landing)
       },
-      {
-        path: 'game',
-        canActivate: [authGuard],
-        loadComponent: () => import('./pages/game/game').then(m => m.Game)
-      },
+      // {
+      //   path: 'game',
+      //   canActivate: [authGuard],
+      //   loadComponent: () => import('./pages/game/game').then(m => m.Game)
+      // },
       {
         path: 'game/:id',
         canActivate: [authGuard],
@@ -32,7 +32,11 @@ export const routes: Routes = [
         path: 'account',
         canActivate: [authGuard],
         loadComponent: () => import('./pages/account/account').then(m => m.Account)
-      }
+      },
+      {
+        path: '**',
+        redirectTo: ''
+      },
     ]
   }
 ];
