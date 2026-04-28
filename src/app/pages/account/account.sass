@@ -130,44 +130,44 @@
   font-weight: 600
   animation: fadeIn 0.3s ease
 
+.btn
+  padding: 0.875rem 1.75rem
+  border-radius: 10px
+  font-weight: 600
+  font-size: 1rem
+  transition: all 0.3s ease
+  cursor: pointer
+  border: none
+
+  &:disabled
+    opacity: 0.6
+    cursor: not-allowed
+
+.btn-primary
+  background: linear-gradient(135deg, #8b5cf6, #6366f1)
+  color: white
+  box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4)
+
+  &:hover
+    transform: translateY(-2px)
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6), 0 0 30px rgba(147, 51, 234, 0.4)
+
+.btn-secondary
+  background: transparent
+  color: #a78bfa
+  border: 2px solid rgba(147, 51, 234, 0.5)
+
+  &:hover
+    background: rgba(139, 92, 246, 0.1)
+    border-color: #a78bfa
+    transform: translateY(-2px)
+
 .account-actions
   margin-top: 2rem
   display: flex
   gap: 1rem
   justify-content: center
   flex-wrap: wrap
-
-  .btn
-    padding: 0.875rem 1.75rem
-    border-radius: 10px
-    font-weight: 600
-    font-size: 1rem
-    transition: all 0.3s ease
-    cursor: pointer
-    border: none
-
-    &:disabled
-      opacity: 0.6
-      cursor: not-allowed
-
-  .btn-primary
-    background: linear-gradient(135deg, #8b5cf6, #6366f1)
-    color: white
-    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4)
-
-    &:hover
-      transform: translateY(-2px)
-      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.6), 0 0 30px rgba(147, 51, 234, 0.4)
-
-  .btn-secondary
-    background: transparent
-    color: #a78bfa
-    border: 2px solid rgba(147, 51, 234, 0.5)
-
-    &:hover
-      background: rgba(139, 92, 246, 0.1)
-      border-color: #a78bfa
-      transform: translateY(-2px)
 
 @keyframes fadeInUp
   from
