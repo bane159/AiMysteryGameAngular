@@ -1233,6 +1233,104 @@
         &.impostor
           color: #ef4444
 
+  .xp-result-section
+    background: rgba(139, 92, 246, 0.07)
+    border: 1px solid rgba(139, 92, 246, 0.25)
+    border-radius: 12px
+    padding: 1rem 1.25rem
+    margin-bottom: 1.5rem
+    text-align: left
+
+    .xp-earned-row
+      display: flex
+      justify-content: space-between
+      align-items: center
+      margin-bottom: 0.8rem
+
+      .xp-earned-label
+        color: #9ca3af
+        font-size: 0.78rem
+        font-weight: 700
+        text-transform: uppercase
+        letter-spacing: 0.06em
+
+      .xp-earned-amounts
+        display: flex
+        gap: 0.5rem
+        align-items: center
+
+        .xp-base
+          color: #a78bfa
+          font-weight: 700
+          font-size: 1rem
+
+        .xp-bonus
+          color: #fbbf24
+          font-weight: 700
+          font-size: 0.85rem
+          background: rgba(251, 191, 36, 0.1)
+          border: 1px solid rgba(251, 191, 36, 0.35)
+          border-radius: 999px
+          padding: 0.1rem 0.55rem
+
+    .xp-level-bar-wrap
+      display: flex
+      align-items: center
+      gap: 0.75rem
+
+      .xp-level-badge
+        background: rgba(147, 51, 234, 0.2)
+        border: 1px solid rgba(147, 51, 234, 0.5)
+        color: #c4b5fd
+        font-size: 0.9rem
+        font-weight: 700
+        padding: 0.3rem 0.75rem
+        border-radius: 999px
+        min-width: 2.8rem
+        text-align: center
+        transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease
+        flex-shrink: 0
+
+        &.just-leveled
+          background: rgba(139, 92, 246, 0.45)
+          border-color: #a78bfa
+          color: white
+          box-shadow: 0 0 14px rgba(139, 92, 246, 0.75)
+
+      .xp-bar-track
+        flex: 1
+        height: 10px
+        background: rgba(255, 255, 255, 0.08)
+        border-radius: 999px
+        overflow: hidden
+
+        .xp-bar-fill
+          height: 100%
+          background: linear-gradient(90deg, #8b5cf6, #6366f1)
+          border-radius: 999px
+          width: 0%
+          transition-property: width
+          transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1)
+          transition-duration: 1200ms
+
+      .xp-max-label
+        color: #fbbf24
+        font-size: 0.75rem
+        font-weight: 700
+        letter-spacing: 0.05em
+        flex-shrink: 0
+
+    .level-up-banner
+      margin-top: 0.75rem
+      text-align: center
+      color: #fbbf24
+      font-size: 1.05rem
+      font-weight: 800
+      letter-spacing: 0.06em
+      text-transform: uppercase
+      text-shadow: 0 0 14px rgba(251, 191, 36, 0.65)
+      animation: levelUpPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)
+
   .scenarios-block
     margin-bottom: 1.5rem
     text-align: left
@@ -1404,4 +1502,14 @@
   50%
     transform: scale(1.2)
   100%
+    transform: scale(1)
+
+@keyframes levelUpPop
+  0%
+    opacity: 0
+    transform: scale(0.4)
+  60%
+    transform: scale(1.15)
+  100%
+    opacity: 1
     transform: scale(1)

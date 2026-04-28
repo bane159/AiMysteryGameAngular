@@ -5,7 +5,7 @@ import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
 import { Subscription } from 'rxjs';
 import { ToastService } from '../../services/toast.service';
-import { GameOptionItem } from '../../interfaces/all-interfaces';
+import { GameOptionItem, Progress } from '../../interfaces/all-interfaces';
 
 @Component({
   selector: 'app-header',
@@ -16,6 +16,8 @@ import { GameOptionItem } from '../../interfaces/all-interfaces';
 export class Header implements OnInit, OnDestroy {
   public isLoggedIn: boolean = false;
   private authSubscription?: Subscription;
+  private progressSubscription?: Subscription;
+  progress: Progress | null = null;
 
   isStartGameModalOpen = false;
   loadingGameOptions = false;
@@ -118,10 +120,18 @@ export class Header implements OnInit, OnDestroy {
         console.log('Auth state changed:', loggedIn);
       }
     );
+
+    // Subscribe to progress changes
+    this.progressSubscription = this.authService.progress$.subscribe(
+      (progress) => {
+        this.progress = progress;
+      }
+    );
   }
 
   ngOnDestroy() {
     this.authSubscription?.unsubscribe();
+    this.progressSubscription?.unsubscribe();
   }
 
   private fetchGameOptions() {

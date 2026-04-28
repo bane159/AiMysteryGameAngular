@@ -6,7 +6,7 @@ import { AuthService } from '../../services/authentification';
 import { GameService } from '../../services/game.service';
 import { ToastService } from '../../services/toast.service';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { GameDetail, GameCharacter, RoomWithRules, GuessResult, CharacterScenario, ChatMessage } from '../../interfaces/all-interfaces';
+import { GameDetail, GameCharacter, RoomWithRules, GuessResult, CharacterScenario, ChatMessage, Progress } from '../../interfaces/all-interfaces';
 
 @Component({
   selector: 'app-game',
@@ -38,6 +38,15 @@ export class Game implements OnInit {
   guessResult: GuessResult | null = null;
   guessMessage: string | null = null;
   guessScenarios: CharacterScenario[] = [];
+
+  // XP animation state
+  guessXpGained = 0;
+  guessBonusXp = 0;
+  xpBarPct = 0;
+  xpBarTransitionDuration = '0ms';
+  xpDisplayLevel = 0;
+  xpLeveledUp = false;
+  xpMaxLevel = false;
 
   // Notes state
   gameNotes = '';
@@ -132,7 +141,7 @@ export class Game implements OnInit {
     this.sendingMessage = true;
     this.chatError = null;
 
-    // Show user message immediately (optimistic)
+
     const tempUserMessage: ChatMessage = {
       id: -Date.now(),
       sender: 'user',
@@ -147,19 +156,19 @@ export class Game implements OnInit {
         next: (response) => {
           this.sendingMessage = false;
           if (response.success && response.user_message && response.ai_response) {
-            // Replace temp with real user message
+           
             const idx = character.conversation.messages.indexOf(tempUserMessage);
             if (idx !== -1) {
               character.conversation.messages[idx] = response.user_message;
             }
-            // Push AI response onto the captured character
+            
             character.conversation.messages.push(response.ai_response);
 
             if (this.selectedCharacter?.id === character.id) {
               this.messagesRemaining = response.messages_remaining ?? null;
             }
           } else {
-            // Remove optimistic message on failure
+            
             const idx = character.conversation.messages.indexOf(tempUserMessage);
             if (idx !== -1) character.conversation.messages.splice(idx, 1);
             if (this.selectedCharacter?.id === character.id) {
@@ -191,6 +200,7 @@ export class Game implements OnInit {
     if (!this.characterToGuess || !this.gameId || this.guessing) return;
 
     this.guessing = true;
+    const progressBefore = this.authService.getCurrentProgress();
 
     this.gameService.guessImpostor(this.gameId, this.characterToGuess.id)
       .pipe(takeUntil(this.destroy$))
@@ -209,6 +219,23 @@ export class Game implements OnInit {
               this.game.character_scenarios = response.game.character_scenarios;
               this.guessScenarios = response.game.character_scenarios;
             }
+            // Sync finished status into the shared games list (aside)
+            if (this.gameId && response.game) {
+              this.gameService.getGames().subscribe({
+                next: (gamesResponse) => {
+                  if (gamesResponse.success && gamesResponse.games) {
+                    this.gameService.updateGames(gamesResponse.games);
+                  }
+                }
+              });
+            }
+            // Start XP animation
+            this.startXpAnimation(
+              progressBefore,
+              response.progress ?? null,
+              response.xp_gained ?? 0,
+              response.bonus_xp ?? 0
+            );
           }
         },
         error: (err) => {
@@ -222,6 +249,9 @@ export class Game implements OnInit {
     this.guessResult = null;
     this.guessMessage = null;
     this.guessScenarios = [];
+    this.guessXpGained = 0;
+    this.guessBonusXp = 0;
+    this.xpLeveledUp = false;
   }
 
   updateNotes(): void {
@@ -272,6 +302,50 @@ export class Game implements OnInit {
       return 'Just now';
     }
     return new Date(dateString).toLocaleString();
+  }
+
+  private startXpAnimation(progressBefore: Progress | null, progressAfter: Progress | null, xpGained: number, bonusXp: number): void {
+    this.guessXpGained = xpGained;
+    this.guessBonusXp = bonusXp;
+
+    if (!progressAfter) return;
+
+    this.xpMaxLevel = progressAfter.is_max_level;
+    const fromPct = progressBefore?.xp_percentage ?? 0;
+    const fromLevel = progressBefore?.level ?? progressAfter.level;
+    const leveledUp = progressAfter.level > fromLevel;
+
+    // Set initial state (no transition)
+    this.xpBarTransitionDuration = '0ms';
+    this.xpBarPct = fromPct;
+    this.xpDisplayLevel = fromLevel;
+    this.xpLeveledUp = false;
+
+    if (!leveledUp) {
+      // Simple fill to new percentage
+      setTimeout(() => {
+        this.xpBarTransitionDuration = '1200ms';
+        this.xpBarPct = progressAfter.xp_percentage;
+      }, 400);
+    } else {
+      // Phase 1: fill bar to 100%
+      setTimeout(() => {
+        this.xpBarTransitionDuration = '1000ms';
+        this.xpBarPct = 100;
+      }, 400);
+
+      // Phase 2: level up flash, reset bar, fill to new percentage
+      setTimeout(() => {
+        this.xpBarTransitionDuration = '0ms';
+        this.xpBarPct = 0;
+        this.xpDisplayLevel = progressAfter.level;
+        this.xpLeveledUp = true;
+        setTimeout(() => {
+          this.xpBarTransitionDuration = '1000ms';
+          this.xpBarPct = progressAfter.xp_percentage;
+        }, 150);
+      }, 400 + 1000 + 400);
+    }
   }
 
   private loadNotesForCurrentGame(): void {

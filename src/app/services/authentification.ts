@@ -5,6 +5,7 @@ import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import {
   User,
+  Progress,
   LoginResponse,
   RegisterResponse,
   LogoutResponse,
@@ -24,6 +25,8 @@ export class AuthService {
   private tokenKey = 'jwt_token';
   private userKey = 'user';
   private isLoggedInSubject = new BehaviorSubject<boolean>(this.hasToken());
+  private progressSubject = new BehaviorSubject<Progress | null>(null);
+  progress$ = this.progressSubject.asObservable();
 
   constructor(
     private http: HttpClient,
@@ -39,7 +42,9 @@ export class AuthService {
       tap(response => {
         if (response.success && response.token && response.user) {
           this.setSession(response.token, response.user);
-          
+          if (response.progress) {
+            this.progressSubject.next(response.progress);
+          }
         }
       })
     );
@@ -56,7 +61,9 @@ export class AuthService {
       tap(response => {
         if (response.success && response.token && response.user) {
           this.setSession(response.token, response.user);
-          
+          if (response.progress) {
+            this.progressSubject.next(response.progress);
+          }
         }
       })
     );
@@ -75,6 +82,7 @@ export class AuthService {
   // Logout locally without API call
   logoutLocal(): void {
     this.clearSession();
+    this.progressSubject.next(null);
     this.router.navigate(['/login']);
   }
 
@@ -85,6 +93,9 @@ export class AuthService {
       tap(response => {
         if (response.success && response.user) {
           this.updateCurrentUser(response.user);
+        }
+        if (response.progress) {
+          this.progressSubject.next(response.progress);
         }
       })
     );
@@ -142,6 +153,18 @@ export class AuthService {
   // Observable for login state
   isLoggedIn$(): Observable<boolean> {
     return this.isLoggedInSubject.asObservable();
+  }
+
+  // Update progress subject from any response
+  updateProgress(progress: Progress | undefined | null): void {
+    if (progress) {
+      this.progressSubject.next(progress);
+    }
+  }
+
+  // Get current progress snapshot
+  getCurrentProgress(): Progress | null {
+    return this.progressSubject.getValue();
   }
 
   // Update stored user

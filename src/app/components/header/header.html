@@ -30,6 +30,15 @@
   }
      
   </ul>
+
+  @if(isLoggedIn && progress) {
+    <div class="xp-widget">
+      <span class="xp-level">{{ progress.level }}</span>
+      <div class="xp-bar-container" [title]="progress.is_max_level ? 'Max level' : progress.xp + ' / ' + progress.xp_required + ' XP'">
+        <div class="xp-bar-fill" [style.width.%]="progress.xp_percentage"></div>
+      </div>
+    </div>
+  }
 </div>
 
 @if(isStartGameModalOpen) {

@@ -1,3 +1,12 @@
+// XP and leveling progress
+export interface Progress {
+  level: number;
+  xp: number;
+  xp_required: number | null;
+  xp_percentage: number;
+  is_max_level: boolean;
+}
+
 // User interface with id, username (name), and email
 export interface User {
   id: number;
@@ -13,6 +22,7 @@ export interface LoginResponse {
   message?: string;
   user?: User;
   token?: string;
+  progress?: Progress;
   errors?: ValidationErrors;
 }
 
@@ -22,6 +32,7 @@ export interface RegisterResponse {
   message?: string;
   user?: User;
   token?: string;
+  progress?: Progress;
   errors?: ValidationErrors;
 }
 
@@ -35,6 +46,7 @@ export interface LogoutResponse {
 export interface MeResponse {
   success: boolean;
   user: User;
+  progress?: Progress;
 }
 
 // Validation errors from Laravel
@@ -261,6 +273,8 @@ export interface SendMessageResponse {
   user_message?: ChatMessage;
   ai_response?: ChatMessage;
   messages_remaining?: number;
+  xp_gained?: number;
+  progress?: Progress;
   error?: string;
 }
 
@@ -280,6 +294,9 @@ export interface GuessResponse {
   message: string;
   result?: GuessResult;
   game?: GuessGameData;
+  xp_gained?: number;
+  bonus_xp?: number;
+  progress?: Progress;
 }
 
 export interface GuessGameData {

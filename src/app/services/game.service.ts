@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { GameStartRequest, GameStartResponse, GamesListResponse, GameDetailResponse, SendMessageRequest, SendMessageResponse, GuessRequest, GuessResponse, GameListItem, DeleteGameResponse, GameOptionsResponse } from '../interfaces/all-interfaces';
 import { environment } from '../../environments/environment';
+import { AuthService } from './authentification';
+import { ToastService } from './toast.service';
 
 export type GameStatusFilter = 'all' | 'in-progress' | 'finished' | 'favorites';
 export type GameSortOrder = 'newest' | 'oldest';
@@ -21,7 +24,11 @@ export class GameService {
   private currentUserId: number | null = null;
   private favoriteGameIds = new Set<number>();
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private toastService: ToastService
+  ) {}
 
 
   private gamesSubject = new BehaviorSubject<GameListItem[]>([]);
@@ -160,6 +167,15 @@ export class GameService {
     return this.http.post<SendMessageResponse>(
       `${this.apiUrl}/games/${gameId}/characters/${characterId}/message`,
       payload
+    ).pipe(
+      tap(response => {
+        if (response.success) {
+          this.authService.updateProgress(response.progress);
+          if (response.xp_gained) {
+            this.toastService.success(`+${response.xp_gained} XP`, 3000);
+          }
+        }
+      })
     );
   }
 
@@ -169,6 +185,17 @@ export class GameService {
     return this.http.post<GuessResponse>(
       `${this.apiUrl}/games/${gameId}/guess`,
       payload
+    ).pipe(
+      tap(response => {
+        if (response.success) {
+          this.authService.updateProgress(response.progress);
+          const total = (response.xp_gained ?? 0) + (response.bonus_xp ?? 0);
+          if (total > 0) {
+            const bonusPart = response.bonus_xp ? ` (+${response.bonus_xp} bonus)` : '';
+            this.toastService.success(`+${response.xp_gained} XP${bonusPart}`, 4000);
+          }
+        }
+      })
     );
   }
 

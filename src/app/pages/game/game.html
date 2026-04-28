@@ -398,6 +398,36 @@
             </div>
           </div>
 
+          @if(guessXpGained > 0) {
+            <div class="xp-result-section">
+              <div class="xp-earned-row">
+                <span class="xp-earned-label">XP Earned</span>
+                <div class="xp-earned-amounts">
+                  <span class="xp-base">+{{ guessXpGained }} XP</span>
+                  @if(guessBonusXp > 0) {
+                    <span class="xp-bonus">+{{ guessBonusXp }} bonus</span>
+                  }
+                </div>
+              </div>
+              <div class="xp-level-bar-wrap">
+                <div class="xp-level-badge" [class.just-leveled]="xpLeveledUp">{{ xpDisplayLevel }}</div>
+                <div class="xp-bar-track">
+                  <div
+                    class="xp-bar-fill"
+                    [style.width.%]="xpBarPct"
+                    [style.transition-duration]="xpBarTransitionDuration">
+                  </div>
+                </div>
+                @if(xpMaxLevel) {
+                  <span class="xp-max-label">MAX</span>
+                }
+              </div>
+              @if(xpLeveledUp) {
+                <div class="level-up-banner">⬆ Level Up!</div>
+              }
+            </div>
+          }
+
           @if(guessScenarios.length > 0) {
             <div class="scenarios-block">
               <h3>Scenario Reveal</h3>
